@@ -2,9 +2,11 @@
 import Rectangle from "@/components/Rectangle";
 import {DatePicker, LocalizationProvider} from "@mui/x-date-pickers";
 import {AdapterDateFns} from "@mui/x-date-pickers/AdapterDateFns";
-import {JSX, useCallback, useEffect, useMemo, useRef, useState} from "react";
+import {JSX, useCallback, useEffect, useMemo, useState} from "react";
 import {differenceInDays, differenceInMonths, differenceInYears, format} from "date-fns";
 import {FormControl, FormControlLabel, FormLabel, InputLabel, MenuItem, Radio, RadioGroup, Select} from "@mui/material";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faGithub} from '@fortawesome/free-brands-svg-icons'
 
 const kindergartenYear = 3
 const primarySchoolYear = 6
@@ -217,8 +219,11 @@ export default function Home() {
 
   return (
     <>
-      <header className='px-20 pt-2 flex'>
+      <header className='px-20 pt-2 flex justify-between items-center'>
         <p className='text-3xl'>人生进度表</p>
+        <a className='no-underline' href='https://github.com/zshnb/lifetime-visualization' target='_blank'>
+          <FontAwesomeIcon icon={faGithub} fontSize={30}/>
+        </a>
       </header>
       <main className='p-20 flex flex-col'>
         <div className='pb-4 flex flex-col gap-2'>
