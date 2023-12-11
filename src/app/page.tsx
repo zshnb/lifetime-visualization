@@ -1,7 +1,7 @@
-"use client"
-import Rectangle from "@/components/Rectangle"
-import { faGithub } from "@fortawesome/free-brands-svg-icons"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+'use client'
+import Rectangle from '@/components/Rectangle'
+import { faGithub } from '@fortawesome/free-brands-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   FormControl,
   FormControlLabel,
@@ -13,9 +13,9 @@ import {
   Select,
   TextField,
   debounce
-} from "@mui/material"
-import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers"
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns"
+} from '@mui/material'
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers'
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import {
   addDays,
   addMonths,
@@ -27,9 +27,9 @@ import {
   differenceInYears,
   format,
   min
-} from "date-fns"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { useDebouncedCallback } from "use-debounce"
+} from 'date-fns'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useDebouncedCallback } from 'use-debounce'
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -43,48 +43,48 @@ const masterSchoolYear = 3
 const doctorSchoolYear = 4
 const rectangleTypes = [
   {
-    label: "出生",
-    backgroundColor: "bg-zinc-400"
+    label: '出生',
+    backgroundColor: 'bg-zinc-400'
   },
   {
-    label: "幼儿园",
-    backgroundColor: "bg-red-600"
+    label: '幼儿园',
+    backgroundColor: 'bg-red-600'
   },
   {
-    label: "小学",
-    backgroundColor: "bg-orange-400"
+    label: '小学',
+    backgroundColor: 'bg-orange-400'
   },
   {
-    label: "初中",
-    backgroundColor: "bg-yellow-400"
+    label: '初中',
+    backgroundColor: 'bg-yellow-400'
   },
   {
-    label: "高中",
-    backgroundColor: "bg-rose-400"
+    label: '高中',
+    backgroundColor: 'bg-rose-400'
   },
   {
-    label: "大学专科",
-    backgroundColor: "bg-purple-400"
+    label: '大学专科',
+    backgroundColor: 'bg-purple-400'
   },
   {
-    label: "大学本科",
-    backgroundColor: "bg-cyan-400"
+    label: '大学本科',
+    backgroundColor: 'bg-cyan-400'
   },
   {
-    label: "硕士",
-    backgroundColor: "bg-pink-400"
+    label: '硕士',
+    backgroundColor: 'bg-pink-400'
   },
   {
-    label: "博士",
-    backgroundColor: "bg-lime-400"
+    label: '博士',
+    backgroundColor: 'bg-lime-400'
   },
   {
-    label: "平凡的一天",
-    backgroundColor: "bg-green-200"
+    label: '平凡的一天',
+    backgroundColor: 'bg-green-200'
   },
   {
-    label: "今天",
-    backgroundColor: "bg-sky-600"
+    label: '今天',
+    backgroundColor: 'bg-sky-600'
   }
 ]
 
@@ -105,7 +105,7 @@ export default function Home() {
     if (value) {
       setBirthday(value)
       try {
-        format(value, "yyyy-MM-dd")
+        format(value, 'yyyy-MM-dd')
         setValidDate(true)
       } catch (e) {
         setValidDate(false)
@@ -144,8 +144,8 @@ export default function Home() {
       start: (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear) * unit,
       end:
         (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear + technicalCollegeYear) * unit - 1,
-      backgroundColor: "bg-purple-400",
-      label: "大学专科"
+      backgroundColor: 'bg-purple-400',
+      label: '大学专科'
     }
   }, [unit])
 
@@ -153,8 +153,8 @@ export default function Home() {
     return {
       start: (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear) * unit,
       end: (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear + bachelorSchoolYear) * unit - 1,
-      backgroundColor: "bg-cyan-400",
-      label: "大学本科"
+      backgroundColor: 'bg-cyan-400',
+      label: '大学本科'
     }
   }, [unit])
 
@@ -170,8 +170,8 @@ export default function Home() {
           masterSchoolYear) *
           unit -
         1,
-      backgroundColor: "bg-pink-400",
-      label: "硕士"
+      backgroundColor: 'bg-pink-400',
+      label: '硕士'
     }
   }, [unit])
 
@@ -195,8 +195,8 @@ export default function Home() {
           doctorSchoolYear) *
           unit -
         1,
-      backgroundColor: "bg-lime-400",
-      label: "博士"
+      backgroundColor: 'bg-lime-400',
+      label: '博士'
     }
   }, [unit])
   const stageWithIndex = useMemo(() => {
@@ -204,32 +204,32 @@ export default function Home() {
       {
         start: 0,
         end: kindergartenYear * unit - 1,
-        backgroundColor: "bg-zinc-400",
-        label: "出生"
+        backgroundColor: 'bg-zinc-400',
+        label: '出生'
       },
       {
         start: kindergartenYear * unit,
         end: primarySchoolYear * unit - 1,
-        backgroundColor: "bg-red-600",
-        label: "幼儿园"
+        backgroundColor: 'bg-red-600',
+        label: '幼儿园'
       },
       {
         start: primarySchoolYear * unit,
         end: (primarySchoolYear + primarySchoolYear) * unit - 1,
-        backgroundColor: "bg-orange-400",
-        label: "小学"
+        backgroundColor: 'bg-orange-400',
+        label: '小学'
       },
       {
         start: (primarySchoolYear + primarySchoolYear) * unit,
         end: (primarySchoolYear + primarySchoolYear + juniorSchoolYear) * unit - 1,
-        backgroundColor: "bg-yellow-400",
-        label: "初中"
+        backgroundColor: 'bg-yellow-400',
+        label: '初中'
       },
       {
         start: (primarySchoolYear + primarySchoolYear + juniorSchoolYear) * unit,
         end: (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear) * unit - 1,
-        backgroundColor: "bg-rose-400",
-        label: "高中"
+        backgroundColor: 'bg-rose-400',
+        label: '高中'
       }
     ]
     switch (degree) {
@@ -254,14 +254,14 @@ export default function Home() {
     base.push({
       start: lastItem.end,
       end: personDays - 1,
-      backgroundColor: "bg-green-200",
-      label: "平凡的一天"
+      backgroundColor: 'bg-green-200',
+      label: '平凡的一天'
     })
     base.push({
       start: personDays,
       end: personDays,
-      backgroundColor: "bg-sky-600",
-      label: "今天"
+      backgroundColor: 'bg-sky-600',
+      label: '今天'
     })
     return base
   }, [unit, degree, personDays])
@@ -270,11 +270,11 @@ export default function Home() {
     (day: number) => {
       // 今天
       if (day === personDays) {
-        return "bg-sky-600"
+        return 'bg-sky-600'
       }
       // 未来
       if (day > personDays) {
-        return "bg-slate-200"
+        return 'bg-slate-200'
       }
 
       for (const obj of stageWithIndex) {
@@ -283,7 +283,7 @@ export default function Home() {
         }
       }
 
-      return "bg-green-200"
+      return 'bg-green-200'
     },
     [personDays, stageWithIndex]
   )
@@ -330,7 +330,7 @@ export default function Home() {
 
       return {
         key: it,
-        date: date && format(date, "yyyy-MM-dd"),
+        date: date && format(date, 'yyyy-MM-dd'),
         backgroundColor,
         stage
       }
@@ -346,22 +346,22 @@ export default function Home() {
       switch (unit) {
         case 365: {
           days = differenceInDays(new Date(), birthday)
-          unitDisplay = "天"
+          unitDisplay = '天'
           break
         }
         case 52: {
           days = differenceInWeeks(new Date(), birthday)
-          unitDisplay = "周"
+          unitDisplay = '周'
           break
         }
         case 12: {
           days = differenceInMonths(new Date(), birthday)
-          unitDisplay = "月"
+          unitDisplay = '月'
           break
         }
         case 1: {
           days = differenceInYears(new Date(), birthday)
-          unitDisplay = "年"
+          unitDisplay = '年'
           break
         }
       }
@@ -439,7 +439,7 @@ export default function Home() {
       const canvas = canvasRef.current
       if (!canvas) return
 
-      const ctx = canvas.getContext("2d")
+      const ctx = canvas.getContext('2d')
       if (!ctx) return
 
       let x = 0 // Initial X position
@@ -490,41 +490,41 @@ export default function Home() {
         }
       }, 200)
 
-      window.addEventListener("resize", resize)
+      window.addEventListener('resize', resize)
       return () => {
-        window.removeEventListener("resize", resize)
+        window.removeEventListener('resize', resize)
       }
     }
   }, [])
 
   function mapColor(twColor?: string) {
     switch (twColor) {
-      case "bg-zinc-400":
-        return "#a1a1aa"
-      case "bg-rose-400":
-        return "#fb7185"
-      case "bg-yellow-400":
-        return "#facc15"
-      case "bg-slate-200":
-        return "#e2e8f0"
-      case "bg-orange-400":
-        return "#fb923c"
-      case "bg-green-200":
-        return "#4ade80"
-      case "bg-red-600":
-        return "#dc2626"
-      case "bg-pink-400":
-        return "#f472b6"
-      case "bg-cyan-400":
-        return "#22d3ee"
-      case "bg-lime-400":
-        return "#a3e635"
-      case "bg-sky-600":
-        return "#0284c7"
-      case "bg-purple-400":
-        return "#c084fc"
+      case 'bg-zinc-400':
+        return '#a1a1aa'
+      case 'bg-rose-400':
+        return '#fb7185'
+      case 'bg-yellow-400':
+        return '#facc15'
+      case 'bg-slate-200':
+        return '#e2e8f0'
+      case 'bg-orange-400':
+        return '#fb923c'
+      case 'bg-green-200':
+        return '#4ade80'
+      case 'bg-red-600':
+        return '#dc2626'
+      case 'bg-pink-400':
+        return '#f472b6'
+      case 'bg-cyan-400':
+        return '#22d3ee'
+      case 'bg-lime-400':
+        return '#a3e635'
+      case 'bg-sky-600':
+        return '#0284c7'
+      case 'bg-purple-400':
+        return '#c084fc'
       default:
-        return "#fff"
+        return '#fff'
     }
   }
 
@@ -596,7 +596,7 @@ export default function Home() {
           </div>
           {birthday && (
             <div className="grid auto-cols-auto gap-x-2">
-              <p>你的生日：{format(birthday, "yyyy-MM-dd")}</p>
+              <p>你的生日：{format(birthday, 'yyyy-MM-dd')}</p>
               <p>预计寿命：{maxYear}岁</p>
               <p>{aliveDisplay}</p>
               <p>{remainDisplay}</p>
@@ -605,7 +605,7 @@ export default function Home() {
           )}
         </div>
         {/* {rectangles} */}
-        <canvas id={"canvas"} ref={canvasRef} width={canvasWidth} height={canvasHeight} />
+        <canvas id={'canvas'} ref={canvasRef} width={canvasWidth} height={canvasHeight} />
       </main>
     </>
   )
