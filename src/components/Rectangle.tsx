@@ -13,14 +13,17 @@ export default function Rectangle(props: RectangleProps) {
            onMouseEnter={() => setHover(true)}
            onMouseLeave={() => setHover(false)}
       >
-        <div className={`absolute border border-gray-300 -top-16 flex-col ${hover ? 'flex' : 'hidden'} w-[300px] p-4 rounded z-10 bg-white`}>
-          {props.date &&
-            <div className='flex gap-2'>
-              <p>{props.stage}</p>
-              <p>今天是{props.date}</p>
+        {
+          props.date && (
+            <div
+              className={`absolute border border-gray-300 -top-16 flex-col ${hover ? 'flex' : 'hidden'} w-[300px] p-4 rounded z-10 bg-white`}>
+              <div className='flex gap-2'>
+                <p>{props.stage}</p>
+                <p>今天是{props.date}</p>
+              </div>
             </div>
-          }
-        </div>
+          )
+        }
       </div>
     </>
   )

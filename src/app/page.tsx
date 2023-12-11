@@ -3,7 +3,16 @@ import Rectangle from "@/components/Rectangle";
 import {DatePicker, LocalizationProvider} from "@mui/x-date-pickers";
 import {AdapterDateFns} from "@mui/x-date-pickers/AdapterDateFns";
 import {JSX, useCallback, useEffect, useMemo, useState} from "react";
-import {addDays, addMonths, addYears, differenceInDays, differenceInMonths, differenceInYears, format} from "date-fns";
+import {
+  addDays,
+  addMonths,
+  addWeeks,
+  addYears,
+  differenceInDays,
+  differenceInMonths, differenceInWeeks,
+  differenceInYears,
+  format
+} from "date-fns";
 import {
   FormControl,
   FormControlLabel,
@@ -213,6 +222,10 @@ export default function Home() {
             date = addDays(birthday, it)
             break
           }
+          case 52: {
+            date = addWeeks(birthday, it)
+            break
+          }
           case 12: {
             date = addMonths(birthday, it)
             break
@@ -251,6 +264,11 @@ export default function Home() {
           unitDisplay = '天'
           break
         }
+        case 52: {
+         days = differenceInWeeks(new Date(), birthday)
+          unitDisplay = '周'
+          break
+        }
         case 12: {
           days = differenceInMonths(new Date(), birthday)
           unitDisplay = '月'
@@ -280,6 +298,13 @@ export default function Home() {
           setPersonDays(diff)
           setAliveDisplay(<p>已存活{diff}天</p>)
           setRemainDisplay(<p>剩余{maxYear * unit - diff}天</p>)
+          break
+        }
+        case 52: {
+          const diff = differenceInWeeks(new Date(), birthday)
+          setPersonDays(diff)
+          setAliveDisplay(<p>已存活{diff}周</p>)
+          setRemainDisplay(<p>剩余{maxYear * unit - diff}周</p>)
           break
         }
         case 12: {
@@ -336,6 +361,7 @@ export default function Home() {
               <FormLabel>显示粒度</FormLabel>
               <RadioGroup row value={unit} onChange={(e) => setUnit(parseInt(e.target.value))}>
                 <FormControlLabel value={365} control={<Radio/>} label="日"/>
+                <FormControlLabel value={52} control={<Radio/>} label="周"/>
                 <FormControlLabel value={12} control={<Radio/>} label="月"/>
                 <FormControlLabel value={1} control={<Radio/>} label="年"/>
               </RadioGroup>
