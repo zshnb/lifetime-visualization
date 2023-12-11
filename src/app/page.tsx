@@ -14,6 +14,7 @@ import {
   format, min
 } from "date-fns";
 import {
+  createTheme,
   FormControl,
   FormControlLabel,
   FormLabel,
@@ -22,7 +23,7 @@ import {
   Radio,
   RadioGroup,
   Select, Stack,
-  TextField
+  TextField, ThemeProvider, useMediaQuery
 } from "@mui/material";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faGithub} from '@fortawesome/free-brands-svg-icons'
@@ -95,6 +96,18 @@ export default function Home() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const pathname = usePathname()
+
+  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+
+  const theme = useMemo(
+    () =>
+      createTheme({
+        palette: {
+          mode: prefersDarkMode ? 'dark' : 'light',
+        },
+      }),
+    [prefersDarkMode],
+  );
 
   const handleChangeBirthday = useDebouncedCallback((value) => {
     if (value) {
@@ -400,7 +413,7 @@ export default function Home() {
   }, []);
 
   return (
-    <>
+    <ThemeProvider theme={theme}>
       <header className='px-20 pt-2 flex justify-between items-center'>
         <p className='text-3xl'>人生进度表</p>
         <a className='no-underline' href='https://github.com/zshnb/lifetime-visualization' target='_blank'>
@@ -495,7 +508,7 @@ export default function Home() {
           </div>
         </Stack>
       </main>
-    </>
+    </ThemeProvider>
   )
 }
 
