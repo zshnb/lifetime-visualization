@@ -153,6 +153,7 @@ export default function Home() {
 
 
   const getBackgroundColor = useCallback((day: number) => {
+    // 今天
     if (day === personDays) {
       return 'bg-sky-600'
     }
@@ -179,15 +180,30 @@ export default function Home() {
 
   useEffect(() => {
     if (birthday) {
-      const days = differenceInDays(new Date(), birthday)
+      let days = 0
+      switch (unit) {
+        case 365: {
+          days = differenceInDays(new Date(), birthday)
+          break
+        }
+        case 12: {
+          days = differenceInMonths(new Date(), birthday)
+          break
+        }
+        case 1: {
+          days = differenceInYears(new Date(), birthday)
+          break
+        }
+      }
       setAliveDisplay(<p>已存活{days}天</p>)
       setRemainDisplay(<p>剩余{maxYear * unit - days}天</p>)
       setPersonDays(days)
     }
-  }, [birthday])
+  }, [birthday, unit])
 
   const [aliveDisplay, setAliveDisplay] = useState<JSX.Element>()
   const [remainDisplay, setRemainDisplay] = useState<JSX.Element>()
+
   useEffect(() => {
     setArray(Array.from({ length: unit * maxYear }, (v, k) => k))
     if (birthday) {
