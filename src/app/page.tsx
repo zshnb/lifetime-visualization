@@ -28,64 +28,22 @@ import {
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faGithub} from '@fortawesome/free-brands-svg-icons'
 import {useDebouncedCallback} from "use-debounce";
-import {Timeline, TimelineConnector, TimelineContent, TimelineDot, TimelineItem,
-  TimelineOppositeContent, TimelineSeparator} from "@mui/lab";
+import {
+  Timeline, TimelineConnector, TimelineContent, TimelineDot, TimelineItem,
+  TimelineOppositeContent, TimelineSeparator
+} from "@mui/lab";
 import {usePathname, useRouter, useSearchParams} from "next/navigation";
-
-const kindergartenYear = 3
-const primarySchoolYear = 6
-const juniorSchoolYear = 3
-const highSchoolYear = 3
-const technicalCollegeYear = 3
-const bachelorSchoolYear = 4
-const masterSchoolYear = 3
-const doctorSchoolYear = 4
-const rectangleTypes = [
-  {
-    label: '出生',
-    backgroundColor: 'bg-zinc-400'
-  },
-  {
-    label: '幼儿园',
-    backgroundColor: 'bg-red-600'
-  },
-  {
-    label: '小学',
-    backgroundColor: 'bg-orange-400'
-  },
-  {
-    label: '初中',
-    backgroundColor: 'bg-yellow-400'
-  },
-  {
-    label: '高中',
-    backgroundColor: 'bg-rose-400'
-  },
-  {
-    label: '大学专科',
-    backgroundColor: 'bg-purple-400'
-  },
-  {
-    label: '大学本科',
-    backgroundColor: 'bg-cyan-400'
-  },
-  {
-    label: '硕士',
-    backgroundColor: 'bg-pink-400'
-  },
-  {
-    label: '博士',
-    backgroundColor: 'bg-lime-400'
-  },
-  {
-    label: '平凡的一天',
-    backgroundColor: 'bg-green-200'
-  },
-  {
-    label: '今天',
-    backgroundColor: 'bg-sky-600'
-  },
-]
+import {
+  rectangleTypes,
+  primarySchoolYear,
+  juniorSchoolYear,
+  highSchoolYear,
+  bachelorSchoolYear,
+  masterSchoolYear,
+  doctorSchoolYear,
+  technicalCollegeYear,
+  kindergartenYear
+} from "@/app/constant";
 
 export default function Home() {
   const [maxYear, setMaxYear] = useState(80)
@@ -218,7 +176,7 @@ export default function Home() {
       },
       {
         start: (primarySchoolYear + primarySchoolYear + juniorSchoolYear) * unit,
-        end:  (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear) * unit - 1,
+        end: (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear) * unit - 1,
         backgroundColor: 'bg-rose-400',
         label: '高中',
         years: primarySchoolYear + primarySchoolYear + juniorSchoolYear
@@ -280,7 +238,7 @@ export default function Home() {
   }, [stageWithIndex, liveDays])
 
   const array = useMemo(() => {
-    return Array.from({ length: unit * maxYear }, (v, k) => k)
+    return Array.from({length: unit * maxYear}, (v, k) => k)
   }, [unit, maxYear])
 
 
@@ -378,12 +336,12 @@ export default function Home() {
     if (validDate) {
       return stageWithIndex.filter(it => it.years >= 0)
         .map(it => {
-        return {
-          startDate: format(addDays(birthday!, it.years * 365), 'yyyy-MM-dd'),
-          label: it.label,
-          backgroundColor: it.backgroundColor
-        }
-      })
+          return {
+            startDate: format(addDays(birthday!, it.years * 365), 'yyyy-MM-dd'),
+            label: it.label,
+            backgroundColor: it.backgroundColor
+          }
+        })
     } else {
       return []
     }
@@ -424,7 +382,8 @@ export default function Home() {
         <div className='pb-4 flex flex-col gap-2'>
           <div className='flex flex-col items-start gap-y-2 w-1/4'>
             <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <DatePicker format='yyyy-MM-dd' className='w-full' label='生日' value={birthday} onChange={handleChangeBirthday}/>
+              <DatePicker format='yyyy-MM-dd' className='w-full' label='生日' value={birthday}
+                          onChange={handleChangeBirthday}/>
             </LocalizationProvider>
             <TextField
               label="预计寿命"
@@ -435,7 +394,7 @@ export default function Home() {
               onChange={(e) => {
                 setMaxYear(parseInt(e.target.value))
                 router.push(pathname + '?' + createQueryString('maxYear', e.target.value))
-              }} />
+              }}/>
             <FormControl fullWidth>
               <InputLabel>最高学历</InputLabel>
               <Select value={degree} onChange={(e) => setDegree(e.target.value as number)} label="最高学历">
@@ -492,8 +451,9 @@ export default function Home() {
                           {it.startDate}
                         </TimelineOppositeContent>
                         <TimelineSeparator>
-                          <TimelineDot sx={{color: mapColor(it.backgroundColor), backgroundColor: mapColor(it.backgroundColor)}}/>
-                          <TimelineConnector />
+                          <TimelineDot
+                            sx={{color: mapColor(it.backgroundColor), backgroundColor: mapColor(it.backgroundColor)}}/>
+                          <TimelineConnector/>
                         </TimelineSeparator>
                         <TimelineContent>{it.label}</TimelineContent>
                       </TimelineItem>
