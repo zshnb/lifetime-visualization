@@ -445,7 +445,7 @@ export default function Home() {
                           {it.startDate}
                         </TimelineOppositeContent>
                         <TimelineSeparator>
-                          <TimelineDot sx={{color: it.backgroundColor}}/>
+                          <TimelineDot sx={{color: mapColor(it.backgroundColor), backgroundColor: mapColor(it.backgroundColor)}}/>
                           <TimelineConnector />
                         </TimelineSeparator>
                         <TimelineContent>{it.label}</TimelineContent>
@@ -463,4 +463,35 @@ export default function Home() {
       </main>
     </>
   )
+}
+
+function mapColor(twColor?: string) {
+  switch (twColor) {
+    case "bg-zinc-400":
+      return "#a1a1aa"
+    case "bg-rose-400":
+      return "#fb7185"
+    case "bg-yellow-400":
+      return "#facc15"
+    case "bg-slate-200":
+      return "#e2e8f0"
+    case "bg-orange-400":
+      return "#fb923c"
+    case "bg-green-200":
+      return "#bbf7d0"
+    case "bg-red-600":
+      return "#dc2626"
+    case "bg-pink-400":
+      return "#f472b6"
+    case "bg-cyan-400":
+      return "#22d3ee"
+    case "bg-lime-400":
+      return "#a3e635"
+    case "bg-sky-600":
+      return "#0284c7"
+    case "bg-purple-400":
+      return "#c084fc"
+    default:
+      return "#fff"
+  }
 }
