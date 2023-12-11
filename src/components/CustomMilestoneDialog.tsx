@@ -7,7 +7,7 @@ import {
   FormLabel, Radio, RadioGroup,
   TextField
 } from "@mui/material";
-import {FormEvent, useState} from "react";
+import {FormEvent, forwardRef, Ref, useImperativeHandle, useState} from "react";
 import {AdapterDateFns} from "@mui/x-date-pickers/AdapterDateFns";
 import {DatePicker, LocalizationProvider} from "@mui/x-date-pickers";
 import {Sketch} from "@uiw/react-color";
@@ -22,8 +22,11 @@ export type Milestone = {
   startDate: Date
   color: string
 }
-export default function CustomMilestoneDialog(props: CustomMilestoneDialogProps) {
-  const [open, setOpen] = useState(true)
+export type CustomMilestoneDialogRef = {
+  open: (milestone: Partial<Milestone>) => void
+}
+function CustomMilestoneDialogComponent(props: CustomMilestoneDialogProps, ref: Ref<CustomMilestoneDialogRef>) {
+  const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
   const [unit, setUnit] = useState(1)
   const [date, setDate] = useState<Date | undefined>(undefined)
@@ -31,6 +34,18 @@ export default function CustomMilestoneDialog(props: CustomMilestoneDialogProps)
   const [color, setColor] = useState('#000')
   const [nameError, setNameError] = useState(false)
   const [dateError, setDateError] = useState(false)
+
+  useImperativeHandle(ref, () => ({
+    open: (milestone: Partial<Milestone>) => {
+      console.log('milestone', milestone)
+      setOpen(true)
+      milestone.name && setName(milestone.name)
+      milestone.startDate && setDate(milestone.startDate)
+      milestone.duration && setDuration(milestone.duration)
+      milestone.color && setColor(milestone.color)
+      milestone.unit && setUnit(milestone.unit)
+    }
+  }), []);
 
   const handleClose = () => {
     setOpen(false)
@@ -121,3 +136,6 @@ export default function CustomMilestoneDialog(props: CustomMilestoneDialogProps)
     </Dialog>
   )
 }
+
+const CustomMilestoneDialog = forwardRef(CustomMilestoneDialogComponent)
+export default CustomMilestoneDialog
