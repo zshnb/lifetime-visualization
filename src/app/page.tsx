@@ -4,7 +4,17 @@ import {DatePicker, LocalizationProvider} from "@mui/x-date-pickers";
 import {AdapterDateFns} from "@mui/x-date-pickers/AdapterDateFns";
 import {JSX, useCallback, useEffect, useMemo, useState} from "react";
 import {differenceInDays, differenceInMonths, differenceInYears, format} from "date-fns";
-import {FormControl, FormControlLabel, FormLabel, InputLabel, MenuItem, Radio, RadioGroup, Select} from "@mui/material";
+import {
+  FormControl,
+  FormControlLabel,
+  FormLabel,
+  InputLabel,
+  MenuItem,
+  Radio,
+  RadioGroup,
+  Select,
+  TextField
+} from "@mui/material";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faGithub} from '@fortawesome/free-brands-svg-icons'
 
@@ -63,8 +73,8 @@ const rectangleTypes = [
   },
 ]
 
-const maxYear = 100
 export default function Home() {
+  const [maxYear, setMaxYear] = useState(100)
   const [birthday, setBirthday] = useState<Date | null>(null)
   const [degree, setDegree] = useState(0)
   const [personDays, setPersonDays] = useState(0)
@@ -199,7 +209,7 @@ export default function Home() {
       setRemainDisplay(<p>剩余{maxYear * unit - days}天</p>)
       setPersonDays(days)
     }
-  }, [birthday, unit])
+  }, [birthday, unit, maxYear])
 
   const [aliveDisplay, setAliveDisplay] = useState<JSX.Element>()
   const [remainDisplay, setRemainDisplay] = useState<JSX.Element>()
@@ -231,7 +241,7 @@ export default function Home() {
         }
       }
     }
-  }, [unit]);
+  }, [unit, maxYear]);
 
   return (
     <>
@@ -246,10 +256,10 @@ export default function Home() {
           <div className='flex flex-col items-start gap-y-2 w-1/4'>
             <LocalizationProvider dateAdapter={AdapterDateFns}>
               <DatePicker className='w-full' label='生日' value={birthday} onChange={(value) => {
-                console.log(value)
                 setBirthday(value)
               }}/>
             </LocalizationProvider>
+            <TextField label="预计寿命" variant="outlined" className='w-full' value={maxYear} onChange={(e) => setMaxYear(parseInt(e.target.value))} />
             <FormControl fullWidth>
               <InputLabel>最高学历</InputLabel>
               <Select value={degree} onChange={(e) => setDegree(e.target.value as number)}>
@@ -282,7 +292,7 @@ export default function Home() {
             birthday && (
               <div className='flex gap-x-2'>
                 <p>你的生日：{format(birthday, 'yyyy-MM-dd')}</p>
-                <p>预计寿命：100岁</p>
+                <p>预计寿命：{maxYear}岁</p>
                 <p>{aliveDisplay}</p>
                 <p>{remainDisplay}</p>
                 <p className='font-bold'>祝大家长命百岁</p>
