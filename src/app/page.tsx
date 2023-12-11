@@ -34,7 +34,6 @@ import {
 } from "@mui/lab";
 import {usePathname, useRouter, useSearchParams} from "next/navigation";
 import {
-  rectangleTypes,
   primarySchoolYear,
   juniorSchoolYear,
   highSchoolYear,
@@ -44,6 +43,8 @@ import {
   technicalCollegeYear,
   kindergartenYear
 } from "@/app/constant";
+import CustomMilestoneDialog, {Milestone} from "@/components/CustomMilestoneDialog";
+import useRectangleTypes from "@/hooks/useRectangleTypes";
 
 export default function Home() {
   const [maxYear, setMaxYear] = useState(80)
@@ -236,6 +237,8 @@ export default function Home() {
 
     return 'bg-green-200'
   }, [stageWithIndex, liveDays])
+
+  const {rectangleTypes, addMilestone} = useRectangleTypes()
 
   const array = useMemo(() => {
     return Array.from({length: unit * maxYear}, (v, k) => k)
@@ -468,6 +471,9 @@ export default function Home() {
           </div>
         </Stack>
       </main>
+      <CustomMilestoneDialog onAddMilestone={(milestone: Milestone) => {
+        addMilestone(milestone)
+      }}/>
     </ThemeProvider>
   )
 }

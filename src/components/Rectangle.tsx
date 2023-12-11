@@ -4,6 +4,7 @@ export type RectangleProps = {
   backgroundColor?: string
   date?: string
   stage?: JSX.Element
+  onClick?: () => void
 }
 export default function Rectangle(props: RectangleProps) {
   const [hover, setHover] = useState(false)
@@ -12,6 +13,7 @@ export default function Rectangle(props: RectangleProps) {
       <div className={`relative w-4 h-4 border-0 rounded ${props.backgroundColor}`}
            onMouseEnter={() => setHover(true)}
            onMouseLeave={() => setHover(false)}
+           onClick={props.onClick}
       >
         {
           props.date && (
