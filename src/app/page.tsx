@@ -2,7 +2,7 @@
 import Rectangle from "@/components/Rectangle";
 import {DatePicker, LocalizationProvider} from "@mui/x-date-pickers";
 import {AdapterDateFns} from "@mui/x-date-pickers/AdapterDateFns";
-import {useCallback, useMemo, useState} from "react";
+import {useCallback, useEffect, useMemo, useState} from "react";
 import {
   addDays,
   addMonths,
@@ -29,6 +29,7 @@ import {faGithub} from '@fortawesome/free-brands-svg-icons'
 import {useDebouncedCallback} from "use-debounce";
 import {Timeline, TimelineConnector, TimelineContent, TimelineDot, TimelineItem,
   TimelineOppositeContent, TimelineSeparator} from "@mui/lab";
+import {usePathname, useRouter, useSearchParams} from "next/navigation";
 
 const kindergartenYear = 3
 const primarySchoolYear = 6
@@ -91,6 +92,9 @@ export default function Home() {
   const [degree, setDegree] = useState<number | undefined>()
   const [unit, setUnit] = useState(12)
   const [validDate, setValidDate] = useState(false)
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const pathname = usePathname()
 
   const handleChangeBirthday = useDebouncedCallback((value) => {
     if (value) {
@@ -371,6 +375,30 @@ export default function Home() {
       return []
     }
   }, [stageWithIndex, validDate, birthday])
+
+  const createQueryString = useCallback(
+    (name: string, value: string) => {
+      const params = new URLSearchParams(searchParams)
+      params.set(name, value)
+
+      return params.toString()
+    },
+    [searchParams]
+  )
+
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams)
+    const maxYear = params.get('maxYear')
+    if (maxYear) {
+      setMaxYear(parseInt(maxYear))
+    }
+    const unit = params.get('unit')
+    if (unit) {
+      setUnit(parseInt(unit))
+    }
+
+  }, []);
+
   return (
     <>
       <header className='px-20 pt-2 flex justify-between items-center'>
@@ -391,7 +419,10 @@ export default function Home() {
               className='w-full'
               value={maxYear}
               type='number'
-              onChange={(e) => setMaxYear(parseInt(e.target.value))} />
+              onChange={(e) => {
+                setMaxYear(parseInt(e.target.value))
+                router.push(pathname + '?' + createQueryString('maxYear', e.target.value))
+              }} />
             <FormControl fullWidth>
               <InputLabel>最高学历</InputLabel>
               <Select value={degree} onChange={(e) => setDegree(e.target.value as number)} label="最高学历">
@@ -403,7 +434,10 @@ export default function Home() {
             </FormControl>
             <FormControl>
               <FormLabel>显示粒度</FormLabel>
-              <RadioGroup row value={unit} onChange={(e) => setUnit(parseInt(e.target.value))}>
+              <RadioGroup row value={unit} onChange={(e) => {
+                setUnit(parseInt(e.target.value))
+                router.push(pathname + '?' + createQueryString('unit', e.target.value))
+              }}>
                 <FormControlLabel value={365} control={<Radio/>} label="日"/>
                 <FormControlLabel value={52} control={<Radio/>} label="周"/>
                 <FormControlLabel value={12} control={<Radio/>} label="月"/>

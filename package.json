@@ -18,10 +18,13 @@
     "@mui/lab": "5.0.0-alpha.155",
     "@mui/material": "^5.14.20",
     "@mui/x-date-pickers": "^6.18.4",
+    "@types/qs": "^6.9.10",
     "date-fns": "^2.30.0",
     "next": "14.0.4",
+    "qs": "^6.11.2",
     "react": "^18",
     "react-dom": "^18",
+    "react-router-dom": "^6.20.1",
     "use-debounce": "^10.0.0"
   },
   "devDependencies": {
