@@ -74,7 +74,7 @@ const rectangleTypes = [
 ]
 
 export default function Home() {
-  const [maxYear, setMaxYear] = useState(10)
+  const [maxYear, setMaxYear] = useState(80)
   const [birthday, setBirthday] = useState<Date | null>(null)
   const [degree, setDegree] = useState(0)
   const [personDays, setPersonDays] = useState(0)
