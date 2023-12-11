@@ -497,7 +497,6 @@ export default function Home() {
           const padding = 2; // Adjust this as needed for spacing
 
           // Draw rounded square
-
           ctx.fillStyle = mapColor(
             type.stage?.backgroundColor || type.backgroundColor
           ).toLowerCase();
@@ -511,13 +510,6 @@ export default function Home() {
             y += squareSize + padding * 2;
             x = 0;
           }
-
-          console.log(
-            "x,y",
-            x,
-            y,
-            mapColor(type.stage?.backgroundColor || type.backgroundColor)
-          );
         }
       };
 
