@@ -1,18 +1,7 @@
 'use client'
 import Rectangle from "@/components/Rectangle";
-import {DatePicker, LocalizationProvider} from "@mui/x-date-pickers";
-import {AdapterDateFns} from "@mui/x-date-pickers/AdapterDateFns";
-import {useCallback, useMemo, useState} from "react";
-import {
-  addDays,
-  addMonths,
-  addWeeks,
-  addYears,
-  differenceInDays,
-  differenceInMonths, differenceInWeeks,
-  differenceInYears,
-  format, min
-} from "date-fns";
+import { faGithub } from '@fortawesome/free-brands-svg-icons';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   FormControl,
   FormControlLabel,
@@ -24,9 +13,20 @@ import {
   Select,
   TextField
 } from "@mui/material";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faGithub} from '@fortawesome/free-brands-svg-icons'
-import {useDebouncedCallback} from "use-debounce";
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import {
+  addDays,
+  addMonths,
+  addWeeks,
+  addYears,
+  differenceInDays,
+  differenceInMonths, differenceInWeeks,
+  differenceInYears,
+  format, min
+} from "date-fns";
+import { useCallback, useMemo, useState } from "react";
+import { useDebouncedCallback } from "use-debounce";
 
 const kindergartenYear = 3
 const primarySchoolYear = 6
@@ -352,22 +352,22 @@ export default function Home() {
           <FontAwesomeIcon icon={faGithub} fontSize={30}/>
         </a>
       </header>
-      <main className='p-20 flex flex-col overflow-x-hidden'>
+      <main className='md:p-20 p-4 flex flex-col'>
         <div className='pb-4 flex flex-col gap-2'>
-          <div className='flex flex-col items-start gap-y-2 w-1/4'>
+          <div className='flex flex-col items-start gap-y-4 md:w-1/4 w-full'>
             <LocalizationProvider dateAdapter={AdapterDateFns}>
               <DatePicker format='yyyy-MM-dd' className='w-full' label='生日' value={birthday} onChange={handleChangeBirthday}/>
             </LocalizationProvider>
-            <TextField
-              label="预计寿命"
-              variant="outlined"
-              className='w-full'
-              value={maxYear}
-              type='number'
-              onChange={(e) => setMaxYear(parseInt(e.target.value))} />
+            <TextField label="预计寿命" variant="outlined" className='w-full' value={maxYear} onChange={(e) => {
+              if (e.target.value && Number(e.target.value) < 200) {
+                setMaxYear(Number(e.target.value))
+              } else {
+                setMaxYear(0)
+              }
+            }} />
             <FormControl fullWidth>
-              <InputLabel>最高学历</InputLabel>
-              <Select value={degree} onChange={(e) => setDegree(e.target.value as number)} label="最高学历">
+              <InputLabel id="select-education-label">最高学历</InputLabel>
+              <Select labelId="select-education-label" label="最高学历" value={degree} onChange={(e) => setDegree(e.target.value as number)} className="text-black">
                 <MenuItem value={1}>专科</MenuItem>
                 <MenuItem value={2}>本科</MenuItem>
                 <MenuItem value={3}>硕士</MenuItem>
