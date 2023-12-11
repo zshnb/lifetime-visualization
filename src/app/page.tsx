@@ -21,12 +21,14 @@ import {
   MenuItem,
   Radio,
   RadioGroup,
-  Select,
+  Select, Stack,
   TextField
 } from "@mui/material";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faGithub} from '@fortawesome/free-brands-svg-icons'
 import {useDebouncedCallback} from "use-debounce";
+import {Timeline, TimelineConnector, TimelineContent, TimelineDot, TimelineItem,
+  TimelineOppositeContent, TimelineSeparator} from "@mui/lab";
 
 const kindergartenYear = 3
 const primarySchoolYear = 6
@@ -133,7 +135,8 @@ export default function Home() {
       start: (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear) * unit,
       end: (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear + technicalCollegeYear) * unit - 1,
       backgroundColor: 'bg-purple-400',
-      label: '大学专科'
+      label: '大学专科',
+      years: primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear
     }
   }, [unit])
 
@@ -142,7 +145,8 @@ export default function Home() {
       start: (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear) * unit,
       end: (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear + bachelorSchoolYear) * unit - 1,
       backgroundColor: 'bg-cyan-400',
-      label: '大学本科'
+      label: '大学本科',
+      years: primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear
     }
   }, [unit])
 
@@ -151,7 +155,8 @@ export default function Home() {
       start: (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear + bachelorSchoolYear) * unit,
       end: (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear + bachelorSchoolYear + masterSchoolYear) * unit - 1,
       backgroundColor: 'bg-pink-400',
-      label: '硕士'
+      label: '硕士',
+      years: primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear + bachelorSchoolYear
     }
   }, [unit])
 
@@ -160,7 +165,8 @@ export default function Home() {
       start: (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear + bachelorSchoolYear + masterSchoolYear) * unit,
       end: (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear + bachelorSchoolYear + masterSchoolYear + doctorSchoolYear) * unit - 1,
       backgroundColor: 'bg-lime-400',
-      label: '博士'
+      label: '博士',
+      years: primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear + bachelorSchoolYear + masterSchoolYear
     }
   }, [unit])
   const stageWithIndex = useMemo(() => {
@@ -169,31 +175,36 @@ export default function Home() {
         start: 0,
         end: kindergartenYear * unit - 1,
         backgroundColor: 'bg-zinc-400',
-        label: '出生'
+        label: '出生',
+        years: 0
       },
       {
         start: kindergartenYear * unit,
         end: primarySchoolYear * unit - 1,
         backgroundColor: 'bg-red-600',
-        label: '幼儿园'
+        label: '幼儿园',
+        years: kindergartenYear
       },
       {
         start: primarySchoolYear * unit,
         end: (primarySchoolYear + primarySchoolYear) * unit - 1,
         backgroundColor: 'bg-orange-400',
-        label: '小学'
+        label: '小学',
+        years: primarySchoolYear
       },
       {
         start: (primarySchoolYear + primarySchoolYear) * unit,
         end: (primarySchoolYear + primarySchoolYear + juniorSchoolYear) * unit - 1,
         backgroundColor: 'bg-yellow-400',
-        label: '初中'
+        label: '初中',
+        years: primarySchoolYear + primarySchoolYear
       },
       {
         start: (primarySchoolYear + primarySchoolYear + juniorSchoolYear) * unit,
         end:  (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear) * unit - 1,
         backgroundColor: 'bg-rose-400',
-        label: '高中'
+        label: '高中',
+        years: primarySchoolYear + primarySchoolYear + juniorSchoolYear
       },
     ]
     switch (degree) {
@@ -219,13 +230,15 @@ export default function Home() {
       start: lastItem.end,
       end: liveDays - 1,
       backgroundColor: 'bg-green-200',
-      label: '平凡的一天'
+      label: '平凡的一天',
+      years: -1
     })
     base.push({
       start: liveDays,
       end: liveDays,
       backgroundColor: 'bg-sky-600',
-      label: '今天'
+      label: '今天',
+      years: -1
     })
     return base
   }, [unit, degree, liveDays])
@@ -344,6 +357,20 @@ export default function Home() {
     }
   }, [unit, validDate, birthday, maxYear])
 
+  const timelineItems = useMemo(() => {
+    if (validDate) {
+      return stageWithIndex.filter(it => it.years >= 0)
+        .map(it => {
+        return {
+          startDate: format(addDays(birthday!, it.years * 365), 'yyyy-MM-dd'),
+          label: it.label,
+          backgroundColor: it.backgroundColor
+        }
+      })
+    } else {
+      return []
+    }
+  }, [stageWithIndex, validDate, birthday])
   return (
     <>
       <header className='px-20 pt-2 flex justify-between items-center'>
@@ -406,9 +433,33 @@ export default function Home() {
             )
           }
         </div>
-        <div className='flex flex-wrap gap-1'>
-          {rectangles}
-        </div>
+        <Stack direction='row' gap={2}>
+          {
+            timelineItems.length > 0 && (
+              <div className='basis-80'>
+                <Timeline position="right">
+                  {
+                    timelineItems.map((it) => (
+                      <TimelineItem>
+                        <TimelineOppositeContent color="text.secondary">
+                          {it.startDate}
+                        </TimelineOppositeContent>
+                        <TimelineSeparator>
+                          <TimelineDot sx={{color: it.backgroundColor}}/>
+                          <TimelineConnector />
+                        </TimelineSeparator>
+                        <TimelineContent>{it.label}</TimelineContent>
+                      </TimelineItem>
+                    ))
+                  }
+                </Timeline>
+              </div>
+            )
+          }
+          <div className='flex flex-wrap gap-1 basis-40 grow content-start'>
+            {rectangles}
+          </div>
+        </Stack>
       </main>
     </>
   )
