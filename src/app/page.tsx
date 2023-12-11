@@ -2,7 +2,7 @@
 import Rectangle from "@/components/Rectangle";
 import {DatePicker, LocalizationProvider} from "@mui/x-date-pickers";
 import {AdapterDateFns} from "@mui/x-date-pickers/AdapterDateFns";
-import {JSX, useCallback, useEffect, useMemo, useState} from "react";
+import {useCallback, useMemo, useState} from "react";
 import {
   addDays,
   addMonths,
@@ -11,7 +11,7 @@ import {
   differenceInDays,
   differenceInMonths, differenceInWeeks,
   differenceInYears,
-  format
+  format, min
 } from "date-fns";
 import {
   FormControl,
@@ -26,6 +26,7 @@ import {
 } from "@mui/material";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faGithub} from '@fortawesome/free-brands-svg-icons'
+import {useDebouncedCallback} from "use-debounce";
 
 const kindergartenYear = 3
 const primarySchoolYear = 6
@@ -84,11 +85,48 @@ const rectangleTypes = [
 
 export default function Home() {
   const [maxYear, setMaxYear] = useState(80)
-  const [birthday, setBirthday] = useState<Date | null>(null)
-  const [degree, setDegree] = useState(0)
-  const [personDays, setPersonDays] = useState(0)
-  const [array, setArray] = useState(Array.from({ length: 365 * maxYear }, (v, k) => k))
-  const [unit, setUnit] = useState(365)
+  const [birthday, setBirthday] = useState<Date | undefined>()
+  const [degree, setDegree] = useState<number | undefined>()
+  const [unit, setUnit] = useState(12)
+  const [validDate, setValidDate] = useState(false)
+
+  const handleChangeBirthday = useDebouncedCallback((value) => {
+    if (value) {
+      setBirthday(value)
+      try {
+        format(value, 'yyyy-MM-dd')
+        setValidDate(true)
+      } catch (e) {
+        setValidDate(false)
+      }
+    }
+  }, 500)
+
+  const liveDays = useMemo(() => {
+    let days = 0
+    if (validDate && birthday) {
+      const date = min([new Date(), addYears(birthday, maxYear)])
+      switch (unit) {
+        case 365: {
+          days = differenceInDays(date, birthday)
+          break
+        }
+        case 52: {
+          days = differenceInWeeks(date, birthday)
+          break
+        }
+        case 12: {
+          days = differenceInMonths(date, birthday)
+          break
+        }
+        case 1: {
+          days = differenceInYears(date, birthday)
+          break
+        }
+      }
+    }
+    return days;
+  }, [unit, validDate, birthday, maxYear])
 
   const technicalCollegeStage = useMemo(() => {
     return {
@@ -179,27 +217,26 @@ export default function Home() {
     const lastItem = base[base.length - 1]
     base.push({
       start: lastItem.end,
-      end: personDays - 1,
+      end: liveDays - 1,
       backgroundColor: 'bg-green-200',
       label: '平凡的一天'
     })
     base.push({
-      start: personDays,
-      end: personDays,
+      start: liveDays,
+      end: liveDays,
       backgroundColor: 'bg-sky-600',
       label: '今天'
     })
     return base
-  }, [unit, degree, personDays])
-
+  }, [unit, degree, liveDays])
 
   const getBackgroundColor = useCallback((day: number) => {
     // 今天
-    if (day === personDays) {
+    if (day === liveDays) {
       return 'bg-sky-600'
     }
     // 未来
-    if (day > personDays) {
+    if (day > liveDays) {
       return 'bg-slate-200'
     }
 
@@ -210,13 +247,18 @@ export default function Home() {
     }
 
     return 'bg-green-200'
-  }, [personDays, stageWithIndex])
+  }, [stageWithIndex, liveDays])
+
+  const array = useMemo(() => {
+    return Array.from({ length: unit * maxYear }, (v, k) => k)
+  }, [unit, maxYear])
+
 
   const rectangles = useMemo(() => {
     return array.map((it) => {
       const backgroundColor = getBackgroundColor(it)
       let date
-      if (birthday) {
+      if (validDate && birthday) {
         switch (unit) {
           case 365: {
             date = addDays(birthday, it)
@@ -240,7 +282,7 @@ export default function Home() {
       const stage = stageWithIndex.find(item => it >= item.start && it <= item.end)
       return <Rectangle
         key={it}
-        date={date && format(date, 'yyyy-MM-dd')}
+        date={validDate ? (date && format(date, 'yyyy-MM-dd')) : undefined}
         backgroundColor={backgroundColor}
         stage={
           stage && (
@@ -252,78 +294,55 @@ export default function Home() {
         }
       />
     })
-  }, [getBackgroundColor, array, unit])
+  }, [getBackgroundColor, array, unit, validDate, birthday, stageWithIndex])
 
-  useEffect(() => {
-    if (birthday) {
-      let days = 0
-      let unitDisplay
+  const aliveDisplay = useMemo(() => {
+    if (validDate && birthday) {
+      const date = min([new Date(), addYears(birthday, maxYear)])
       switch (unit) {
         case 365: {
-          days = differenceInDays(new Date(), birthday)
-          unitDisplay = '天'
-          break
+          const diff = differenceInDays(date, birthday)
+          return <p>已存活{diff}天</p>
         }
         case 52: {
-         days = differenceInWeeks(new Date(), birthday)
-          unitDisplay = '周'
-          break
+          const diff = differenceInWeeks(date, birthday)
+          return <p>已存活{diff}周</p>
         }
         case 12: {
-          days = differenceInMonths(new Date(), birthday)
-          unitDisplay = '月'
-          break
+          const diff = differenceInMonths(date, birthday)
+          return <p>已存活{diff}月</p>
         }
         case 1: {
-          days = differenceInYears(new Date(), birthday)
-          unitDisplay = '年'
-          break
-        }
-      }
-      setAliveDisplay(<p>已存活{days}{unitDisplay}</p>)
-      setRemainDisplay(<p>剩余{maxYear * unit - days}{unitDisplay}</p>)
-      setPersonDays(days)
-    }
-  }, [birthday, unit, maxYear])
-
-  const [aliveDisplay, setAliveDisplay] = useState<JSX.Element>()
-  const [remainDisplay, setRemainDisplay] = useState<JSX.Element>()
-
-  useEffect(() => {
-    setArray(Array.from({ length: unit * maxYear }, (v, k) => k))
-    if (birthday) {
-      switch (unit) {
-        case 365: {
-          const diff = differenceInDays(new Date(), birthday)
-          setPersonDays(diff)
-          setAliveDisplay(<p>已存活{diff}天</p>)
-          setRemainDisplay(<p>剩余{maxYear * unit - diff}天</p>)
-          break
-        }
-        case 52: {
-          const diff = differenceInWeeks(new Date(), birthday)
-          setPersonDays(diff)
-          setAliveDisplay(<p>已存活{diff}周</p>)
-          setRemainDisplay(<p>剩余{maxYear * unit - diff}周</p>)
-          break
-        }
-        case 12: {
-          const diff = differenceInMonths(new Date(), birthday)
-          setPersonDays(diff)
-          setAliveDisplay(<p>已存活{diff}月</p>)
-          setRemainDisplay(<p>剩余{maxYear * unit - diff}月</p>)
-          break
-        }
-        case 1: {
-          const diff = differenceInYears(new Date(), birthday)
-          setPersonDays(diff)
-          setAliveDisplay(<p>已存活{diff}年</p>)
-          setRemainDisplay(<p>剩余{maxYear * unit - diff}年</p>)
-          break
+          const diff = differenceInYears(date, birthday)
+          return <p>已存活{diff}年</p>
         }
       }
     }
-  }, [unit, maxYear]);
+  }, [unit, validDate, birthday, maxYear])
+
+  const remainDisplay = useMemo(() => {
+    if (validDate && birthday) {
+      const date = min([new Date(), addYears(birthday, maxYear)])
+      switch (unit) {
+        case 365: {
+          const diff = differenceInDays(date, birthday)
+          return <p>剩余{Math.max(maxYear * unit - diff, 0)}天</p>
+        }
+        case 52: {
+          const diff = differenceInWeeks(date, birthday)
+          return <p>剩余{Math.max(maxYear * unit - diff, 0)}周</p>
+        }
+        case 12: {
+          const diff = differenceInMonths(date, birthday)
+          return <p>剩余{Math.max(maxYear * unit - diff, 0)}月</p>
+        }
+        case 1: {
+          const diff = differenceInYears(date, birthday)
+          return <p>剩余{Math.max(maxYear * unit - diff, 0)}年</p>
+        }
+      }
+    }
+  }, [unit, validDate, birthday, maxYear])
 
   return (
     <>
@@ -333,13 +352,11 @@ export default function Home() {
           <FontAwesomeIcon icon={faGithub} fontSize={30}/>
         </a>
       </header>
-      <main className='p-20 flex flex-col'>
+      <main className='p-20 flex flex-col overflow-x-hidden'>
         <div className='pb-4 flex flex-col gap-2'>
           <div className='flex flex-col items-start gap-y-2 w-1/4'>
             <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <DatePicker className='w-full' label='生日' value={birthday} onChange={(value) => {
-                setBirthday(value)
-              }}/>
+              <DatePicker format='yyyy-MM-dd' className='w-full' label='生日' value={birthday} onChange={handleChangeBirthday}/>
             </LocalizationProvider>
             <TextField
               label="预计寿命"
@@ -350,7 +367,7 @@ export default function Home() {
               onChange={(e) => setMaxYear(parseInt(e.target.value))} />
             <FormControl fullWidth>
               <InputLabel>最高学历</InputLabel>
-              <Select value={degree} onChange={(e) => setDegree(e.target.value as number)}>
+              <Select value={degree} onChange={(e) => setDegree(e.target.value as number)} label="最高学历">
                 <MenuItem value={1}>专科</MenuItem>
                 <MenuItem value={2}>本科</MenuItem>
                 <MenuItem value={3}>硕士</MenuItem>
@@ -378,7 +395,7 @@ export default function Home() {
             }
           </div>
           {
-            birthday && (
+            validDate && birthday && (
               <div className='flex gap-x-2'>
                 <p>你的生日：{format(birthday, 'yyyy-MM-dd')}</p>
                 <p>预计寿命：{maxYear}岁</p>
