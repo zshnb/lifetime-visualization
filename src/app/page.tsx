@@ -3,7 +3,7 @@ import Rectangle from "@/components/Rectangle";
 import {DatePicker, LocalizationProvider} from "@mui/x-date-pickers";
 import {AdapterDateFns} from "@mui/x-date-pickers/AdapterDateFns";
 import {JSX, useCallback, useEffect, useMemo, useState} from "react";
-import {differenceInDays, differenceInMonths, differenceInYears, format} from "date-fns";
+import {addDays, addMonths, addYears, differenceInDays, differenceInMonths, differenceInYears, format} from "date-fns";
 import {
   FormControl,
   FormControlLabel,
@@ -74,7 +74,7 @@ const rectangleTypes = [
 ]
 
 export default function Home() {
-  const [maxYear, setMaxYear] = useState(100)
+  const [maxYear, setMaxYear] = useState(10)
   const [birthday, setBirthday] = useState<Date | null>(null)
   const [degree, setDegree] = useState(0)
   const [personDays, setPersonDays] = useState(0)
@@ -85,7 +85,8 @@ export default function Home() {
     return {
       start: (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear) * unit,
       end: (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear + technicalCollegeYear) * unit - 1,
-      backgroundColor: 'bg-purple-400'
+      backgroundColor: 'bg-purple-400',
+      label: '大学专科'
     }
   }, [unit])
 
@@ -93,7 +94,8 @@ export default function Home() {
     return {
       start: (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear) * unit,
       end: (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear + bachelorSchoolYear) * unit - 1,
-      backgroundColor: 'bg-cyan-400'
+      backgroundColor: 'bg-cyan-400',
+      label: '大学本科'
     }
   }, [unit])
 
@@ -101,7 +103,8 @@ export default function Home() {
     return {
       start: (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear + bachelorSchoolYear) * unit,
       end: (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear + bachelorSchoolYear + masterSchoolYear) * unit - 1,
-      backgroundColor: 'bg-pink-400'
+      backgroundColor: 'bg-pink-400',
+      label: '硕士'
     }
   }, [unit])
 
@@ -109,7 +112,8 @@ export default function Home() {
     return {
       start: (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear + bachelorSchoolYear + masterSchoolYear) * unit,
       end: (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear + bachelorSchoolYear + masterSchoolYear + doctorSchoolYear) * unit - 1,
-      backgroundColor: 'bg-lime-400'
+      backgroundColor: 'bg-lime-400',
+      label: '博士'
     }
   }, [unit])
   const stageWithIndex = useMemo(() => {
@@ -117,27 +121,32 @@ export default function Home() {
       {
         start: 0,
         end: kindergartenYear * unit - 1,
-        backgroundColor: 'bg-zinc-400'
+        backgroundColor: 'bg-zinc-400',
+        label: '出生'
       },
       {
         start: kindergartenYear * unit,
         end: primarySchoolYear * unit - 1,
-        backgroundColor: 'bg-red-600'
+        backgroundColor: 'bg-red-600',
+        label: '幼儿园'
       },
       {
         start: primarySchoolYear * unit,
         end: (primarySchoolYear + primarySchoolYear) * unit - 1,
-        backgroundColor: 'bg-orange-400'
+        backgroundColor: 'bg-orange-400',
+        label: '小学'
       },
       {
         start: (primarySchoolYear + primarySchoolYear) * unit,
         end: (primarySchoolYear + primarySchoolYear + juniorSchoolYear) * unit - 1,
-        backgroundColor: 'bg-yellow-400'
+        backgroundColor: 'bg-yellow-400',
+        label: '初中'
       },
       {
         start: (primarySchoolYear + primarySchoolYear + juniorSchoolYear) * unit,
         end:  (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear) * unit - 1,
-        backgroundColor: 'bg-rose-400'
+        backgroundColor: 'bg-rose-400',
+        label: '高中'
       },
     ]
     switch (degree) {
@@ -158,8 +167,21 @@ export default function Home() {
         break
       }
     }
+    const lastItem = base[base.length - 1]
+    base.push({
+      start: lastItem.end,
+      end: personDays - 1,
+      backgroundColor: 'bg-green-200',
+      label: '平凡的一天'
+    })
+    base.push({
+      start: personDays,
+      end: personDays,
+      backgroundColor: 'bg-sky-600',
+      label: '今天'
+    })
     return base
-  }, [unit, degree])
+  }, [unit, degree, personDays])
 
 
   const getBackgroundColor = useCallback((day: number) => {
@@ -184,29 +206,64 @@ export default function Home() {
   const rectangles = useMemo(() => {
     return array.map((it) => {
       const backgroundColor = getBackgroundColor(it)
-      return <Rectangle key={it} backgroundColor={backgroundColor}/>
+      let date
+      if (birthday) {
+        switch (unit) {
+          case 365: {
+            date = addDays(birthday, it)
+            break
+          }
+          case 12: {
+            date = addMonths(birthday, it)
+            break
+          }
+          case 1: {
+            date = addYears(birthday, it)
+            break
+          }
+        }
+      }
+
+      const stage = stageWithIndex.find(item => it >= item.start && it <= item.end)
+      return <Rectangle
+        key={it}
+        date={date && format(date, 'yyyy-MM-dd')}
+        backgroundColor={backgroundColor}
+        stage={
+          stage && (
+            <div className='flex gap-1 items-center'>
+              <Rectangle backgroundColor={stage.backgroundColor}/>
+              <p>{stage.label}</p>
+            </div>
+          )
+        }
+      />
     })
-  }, [getBackgroundColor, array])
+  }, [getBackgroundColor, array, unit])
 
   useEffect(() => {
     if (birthday) {
       let days = 0
+      let unitDisplay
       switch (unit) {
         case 365: {
           days = differenceInDays(new Date(), birthday)
+          unitDisplay = '天'
           break
         }
         case 12: {
           days = differenceInMonths(new Date(), birthday)
+          unitDisplay = '月'
           break
         }
         case 1: {
           days = differenceInYears(new Date(), birthday)
+          unitDisplay = '年'
           break
         }
       }
-      setAliveDisplay(<p>已存活{days}天</p>)
-      setRemainDisplay(<p>剩余{maxYear * unit - days}天</p>)
+      setAliveDisplay(<p>已存活{days}{unitDisplay}</p>)
+      setRemainDisplay(<p>剩余{maxYear * unit - days}{unitDisplay}</p>)
       setPersonDays(days)
     }
   }, [birthday, unit, maxYear])
@@ -259,7 +316,13 @@ export default function Home() {
                 setBirthday(value)
               }}/>
             </LocalizationProvider>
-            <TextField label="预计寿命" variant="outlined" className='w-full' value={maxYear} onChange={(e) => setMaxYear(parseInt(e.target.value))} />
+            <TextField
+              label="预计寿命"
+              variant="outlined"
+              className='w-full'
+              value={maxYear}
+              type='number'
+              onChange={(e) => setMaxYear(parseInt(e.target.value))} />
             <FormControl fullWidth>
               <InputLabel>最高学历</InputLabel>
               <Select value={degree} onChange={(e) => setDegree(e.target.value as number)}>
@@ -282,7 +345,7 @@ export default function Home() {
             {
               rectangleTypes.map(it => (
                 <div className='flex gap-1 items-center'>
-                  <Rectangle backgroundColor={it.backgroundColor}/>
+                  <Rectangle backgroundColor={it.backgroundColor} key={it.label}/>
                   <p>{it.label}</p>
                 </div>
               ))
