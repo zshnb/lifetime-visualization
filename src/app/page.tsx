@@ -133,7 +133,6 @@ export default function Home() {
   }, [unit, liveDays, milestones])
 
   const getBackgroundColor = useCallback((day: number) => {
-    console.log(stages)
     // 今天
     if (day === liveDays) {
       return 'bg-sky-600'
@@ -245,13 +244,16 @@ export default function Home() {
 
   const timelineItems = useMemo(() => {
     if (validDate) {
+      let accumulate = 0
       return stages.filter(it => it.years >= 0)
         .map(it => {
-          return {
-            startDate: format(addDays(birthday!, it.years * 365), 'yyyy-MM-dd'),
+          const object = {
+            startDate: format(addYears(birthday!, accumulate), 'yyyy-MM-dd'),
             label: it.label,
             color: it.color
           }
+          accumulate += it.years
+          return object
         })
     } else {
       return []
