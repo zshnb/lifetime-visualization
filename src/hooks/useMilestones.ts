@@ -1,11 +1,10 @@
 import {useCallback, useState} from "react";
 import {Milestone} from "@/components/CustomMilestoneDialog";
 import {hexColorToTw} from "@/utils/colorUtil";
-import {addDays, addYears} from "date-fns";
+import {addDays, addYears, isAfter, isBefore, isEqual} from "date-fns";
 
-const defaultMilestoneDurationYears = [3, 3, 6, 3, 3, 4, 3, 4]
+const defaultMilestoneDurationYears = [3, 3, 6, 3, 3, 4]
 export default function useMilestones() {
-  const [unit, setUnit] = useState(12)
   const [milestones, setMilestones] = useState<Milestone[]>([
     {
       label: '出生',
@@ -32,14 +31,6 @@ export default function useMilestones() {
       color: 'bg-cyan-400',
     },
     {
-      label: '硕士',
-      color: 'bg-pink-400',
-    },
-    {
-      label: '博士',
-      color: 'bg-lime-400',
-    },
-    {
       label: '平凡的一天',
       color: 'bg-green-200',
     },
@@ -52,6 +43,18 @@ export default function useMilestones() {
   const addMilestone = useCallback((milestone: Milestone) => {
     console.log('add milestone', milestone)
     milestones.splice(milestones.length - 2, 0, milestone)
+    milestones.sort((a: Milestone, b: Milestone) => {
+      if (isBefore(a.startDate!, b.startDate!)) {
+        return -1
+      }
+      if (isAfter(a.startDate!, b.startDate!)) {
+        return 1
+      }
+      if (isEqual(a.startDate!, b.startDate!)) {
+        return isBefore(a.endDate!, b.endDate!) ? -1 : 1
+      }
+      return 0
+    })
     setMilestones([...milestones])
   }, [milestones])
 

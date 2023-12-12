@@ -24,7 +24,7 @@ export type CustomMilestoneDialogRef = {
   open: (milestone: Partial<Milestone>) => void
 }
 function CustomMilestoneDialogComponent(props: CustomMilestoneDialogProps, ref: Ref<CustomMilestoneDialogRef>) {
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(false)
   const [label, setLabel] = useState('')
   const [color, setColor] = useState('#000')
   const [nameError, setNameError] = useState(false)

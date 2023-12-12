@@ -155,7 +155,6 @@ export default function Home() {
 
 
   const rectangles = useMemo(() => {
-    console.log('update rectangle', milestones)
     return array.map((it) => {
       const backgroundColor = getBackgroundColor(it)
       let date
