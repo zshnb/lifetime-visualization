@@ -30,10 +30,10 @@ export default function DateRangePicker({onAccept, dateRange}: DateRangePickerPr
           onChange={(value) => {
             setStartDate(value)
             if (isValid(value)) {
+              setStartDateError('')
               if (endDate && isValid(endDate)) {
                 if (isBefore(value!, endDate)) {
-                  setStartDateError('')
-                  onAccept([startDate!, endDate])
+                  onAccept([value!, endDate])
                 } else {
                   setStartDateError('开始时间不能晚于结束时间')
                 }
@@ -62,7 +62,7 @@ export default function DateRangePicker({onAccept, dateRange}: DateRangePickerPr
               if (startDate && isValid(startDate)) {
                 if (isAfter(value!, startDate)) {
                   setEndDateError('')
-                  onAccept([startDate, endDate!])
+                  onAccept([startDate, value!])
                 } else {
                   setEndDateError('结束时间不能早于开始时间')
                 }

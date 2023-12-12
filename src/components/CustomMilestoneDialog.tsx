@@ -9,7 +9,7 @@ import {
 import {FormEvent, forwardRef, Ref, useImperativeHandle, useState} from "react";
 import {Sketch} from "@uiw/react-color";
 import DateRangePicker from "@/components/DateRangePicker";
-import {hexColorToTw, twColorToHex} from "@/utils/colorUtil";
+import {twColorToHex} from "@/utils/colorUtil";
 
 export type CustomMilestoneDialogProps = {
   onAddMilestone: (item: Milestone) => void
@@ -24,7 +24,7 @@ export type CustomMilestoneDialogRef = {
   open: (milestone: Partial<Milestone>) => void
 }
 function CustomMilestoneDialogComponent(props: CustomMilestoneDialogProps, ref: Ref<CustomMilestoneDialogRef>) {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(true)
   const [label, setLabel] = useState('')
   const [color, setColor] = useState('#000')
   const [nameError, setNameError] = useState(false)
@@ -45,7 +45,6 @@ function CustomMilestoneDialogComponent(props: CustomMilestoneDialogProps, ref: 
   }
 
   const handleSubmit = (e: FormEvent) => {
-    console.log('date range', dateRange)
     e.preventDefault()
     if (!label) {
       setNameError(true)
