@@ -330,7 +330,8 @@ export default function Home() {
                       customMilestoneRef.current?.open({
                         label: it.label,
                         color: it.color,
-                        startDate: birthday
+                        startDate: it.startDate,
+                        endDate: it.endDate
                       })
                     }
                   }} />

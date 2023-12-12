@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {Stack} from "@mui/material";
 import {DatePicker, LocalizationProvider} from "@mui/x-date-pickers";
 import {AdapterDateFns} from "@mui/x-date-pickers/AdapterDateFns";
@@ -6,13 +6,15 @@ import {isAfter, isBefore, isValid, parse} from "date-fns";
 
 export type DateRangePickerProps = {
   onAccept: (range: Date[]) => void
+  dateRange: Date[]
 }
-export default function DateRangePicker({onAccept}: DateRangePickerProps) {
-  const [startDate, setStartDate] = useState<Date | null>()
-  const [endDate, setEndDate] = useState<Date | null>()
+export default function DateRangePicker({onAccept, dateRange}: DateRangePickerProps) {
+  const [startDate, setStartDate] = useState<Date | null>(dateRange[0])
+  const [endDate, setEndDate] = useState<Date | null>(dateRange[1])
 
   const [startDateError, setStartDateError] = useState('')
   const [endDateError, setEndDateError] = useState('')
+
   return (
     <Stack direction='row' gap={2} alignItems='center'>
       <LocalizationProvider dateAdapter={AdapterDateFns}>
