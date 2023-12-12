@@ -1,4 +1,4 @@
-export function twColorToHex(twColor?: string) {
+export function twColorToHex(twColor: string) {
   switch (twColor) {
     case "bg-zinc-400":
       return "#a1a1aa"
@@ -25,10 +25,21 @@ export function twColorToHex(twColor?: string) {
     case "bg-purple-400":
       return "#c084fc"
     default:
-      return "#fff"
+      return twColor
   }
 }
 
 export function hexColorToTw(color: string) {
   return `bg-[${color}]`
+}
+
+export function buildLinearGradient(color1: string, color2: string) {
+  let ratio = 0
+  const array: string[] = []
+  array.push(color1, color2)
+  return array.map(it => {
+    const str = `${it} ${ratio}%, ${it} ${ratio + 50}%`
+    ratio += 50
+    return str
+  }).join(',')
 }

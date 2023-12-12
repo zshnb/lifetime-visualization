@@ -1,7 +1,6 @@
 import {useCallback, useState} from "react";
 import {Milestone} from "@/components/CustomMilestoneDialog";
-import {hexColorToTw} from "@/utils/colorUtil";
-import {addDays, addYears, isAfter, isBefore, isEqual} from "date-fns";
+import {addYears, isAfter, isBefore, isEqual} from "date-fns";
 
 const defaultMilestoneDurationYears = [3, 3, 6, 3, 3, 4]
 export default function useMilestones() {

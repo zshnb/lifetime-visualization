@@ -115,11 +115,11 @@ export default function Home() {
   const getBackgroundColor = useCallback((day: number) => {
     // 今天
     if (day === liveDays) {
-      return 'bg-sky-600'
+      return twColorToHex('bg-sky-600')
     }
     // 未来
     if (day > liveDays) {
-      return 'bg-slate-200'
+      return twColorToHex('bg-slate-200')
     }
 
     if (birthday) {
@@ -142,22 +142,24 @@ export default function Home() {
           break
         }
       }
-      for (const obj of milestones) {
-        if (isEqual(obj.startDate || date, date) ||
-          (isBefore(date, obj.endDate || date) && isAfter(date, obj.startDate || date))) {
-          return obj.color
-        }
+      const colors = milestones.filter(it => {
+        return isEqual(it.startDate!, date) ||
+          (isBefore(date, it.endDate!) && isAfter(date, it.startDate!));
+      })
+        .map(it => twColorToHex(it.color))
+      if (colors.length) {
+        return colors
       }
     }
 
-    return 'bg-green-200'
+    return twColorToHex('bg-green-200')
   }, [liveDays, milestones, birthday, unit])
 
 
   const rectangles = useMemo(() => {
     return array.map((it) => {
       const backgroundColor = getBackgroundColor(it)
-      let date
+      let date: Date = new Date()
       if (validDate && birthday) {
         switch (unit) {
           case 365: {
@@ -179,19 +181,22 @@ export default function Home() {
         }
       }
 
-      const stage = milestones.find(item => item.color === backgroundColor)
+      const validMilestones = milestones.find(item =>
+        isEqual(item.startDate!, date) ||
+        (isBefore(date, item.endDate || date) && isAfter(date, item.startDate || date))
+      )
       return <Rectangle
         key={it}
-        date={validDate ? (date && format(date, 'yyyy-MM-dd')) : undefined}
+        date={validDate ? format(date, 'yyyy-MM-dd') : undefined}
         onClick={() => {
           customMilestoneRef.current?.open({})
         }}
         backgroundColor={backgroundColor}
         stage={
-          stage && (
+          validMilestones && (
             <div className='flex gap-1 items-center'>
-              <Rectangle backgroundColor={stage.color}/>
-              <p>{stage.label}</p>
+              <Rectangle backgroundColor={validMilestones.color}/>
+              <p>{validMilestones.label}</p>
             </div>
           )
         }
