@@ -44,7 +44,7 @@ import {
   kindergartenYear
 } from "@/app/constant";
 import CustomMilestoneDialog, {CustomMilestoneDialogRef, Milestone} from "@/components/CustomMilestoneDialog";
-import useRectangleTypes from "@/hooks/useRectangleTypes";
+import useMilestones from "@/hooks/useMilestones";
 import {twColorToHex} from "@/utils/colorUtil";
 
 export default function Home() {
@@ -239,7 +239,7 @@ export default function Home() {
     return 'bg-green-200'
   }, [stageWithIndex, liveDays])
 
-  const {rectangleTypes, addMilestone} = useRectangleTypes()
+  const {milestones, addMilestone} = useMilestones()
 
   const array = useMemo(() => {
     return Array.from({length: unit * maxYear}, (v, k) => k)
@@ -423,7 +423,7 @@ export default function Home() {
           </div>
           <div className='flex items-center gap-8 flex-wrap'>
             {
-              rectangleTypes.map(it => (
+              milestones.map(it => (
                 <div className='flex gap-1 items-center cursor-pointer' onClick={() => {
                   customMilestoneRef.current?.open({
                     name: it.label,

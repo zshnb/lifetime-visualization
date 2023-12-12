@@ -2,9 +2,9 @@ import {useCallback, useState} from "react";
 import {Milestone} from "@/components/CustomMilestoneDialog";
 import {hexColorToTw} from "@/utils/colorUtil";
 
-export default function useRectangleTypes() {
+export default function useMilestones() {
   const [unit, setUnit] = useState(12)
-  const [rectangleTypes, setRectangleTypes] = useState([
+  const [milestones, setMilestones] = useState([
     {
       label: '出生',
       backgroundColor: 'bg-zinc-400',
@@ -74,7 +74,7 @@ export default function useRectangleTypes() {
   ])
 
   const addMilestone = useCallback((milestone: Milestone) => {
-    setRectangleTypes([...rectangleTypes, {
+    setMilestones([...milestones, {
       label: milestone.name,
       backgroundColor: hexColorToTw(milestone.color),
       duration: milestone.duration,
@@ -82,7 +82,7 @@ export default function useRectangleTypes() {
     }])
   }, [])
   return {
-    rectangleTypes,
+    milestones,
     addMilestone
   }
 }
