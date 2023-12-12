@@ -38,6 +38,9 @@ dependencies:
   '@uiw/react-color':
     specifier: ^2.0.3
     version: 2.0.3(@babel/runtime@7.23.5)(react-dom@18.2.0)(react@18.2.0)
+  DateRangePicker:
+    specifier: link:@mui/x-date-pickers-pro/DateRangePicker
+    version: link:@mui/x-date-pickers-pro/DateRangePicker
   date-fns:
     specifier: ^2.30.0
     version: 2.30.0

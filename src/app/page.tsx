@@ -9,9 +9,13 @@ import {
   addWeeks,
   addYears,
   differenceInDays,
-  differenceInMonths, differenceInWeeks,
+  differenceInMonths,
+  differenceInWeeks,
   differenceInYears,
-  format, min
+  format,
+  isAfter,
+  isBefore, isEqual,
+  min
 } from "date-fns";
 import {
   createTheme,
@@ -20,15 +24,23 @@ import {
   FormLabel,
   Radio,
   RadioGroup,
-  Select, Stack,
-  TextField, ThemeProvider, useMediaQuery
+  Stack,
+  TextField,
+  ThemeProvider,
+  useMediaQuery
 } from "@mui/material";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faGithub} from '@fortawesome/free-brands-svg-icons'
+import {faClose} from '@fortawesome/free-solid-svg-icons'
 import {useDebouncedCallback} from "use-debounce";
 import {
-  Timeline, TimelineConnector, TimelineContent, TimelineDot, TimelineItem,
-  TimelineOppositeContent, TimelineSeparator
+  Timeline,
+  TimelineConnector,
+  TimelineContent,
+  TimelineDot,
+  TimelineItem,
+  TimelineOppositeContent,
+  TimelineSeparator
 } from "@mui/lab";
 import {usePathname, useRouter, useSearchParams} from "next/navigation";
 import CustomMilestoneDialog, {CustomMilestoneDialogRef, Milestone} from "@/components/CustomMilestoneDialog";
@@ -49,6 +61,7 @@ export default function Home() {
   }, [unit, maxYear])
 
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+  const {milestones, addMilestone, removeMilestone, confirmDefaultMilestone} = useMilestones()
 
   const theme = useMemo(
     () =>
@@ -66,6 +79,7 @@ export default function Home() {
       try {
         format(value, 'yyyy-MM-dd')
         setValidDate(true)
+        confirmDefaultMilestone(value)
       } catch (e) {
         setValidDate(false)
       }
@@ -97,40 +111,6 @@ export default function Home() {
     }
     return days;
   }, [unit, validDate, birthday, maxYear])
-  const {milestones, addMilestone} = useMilestones()
-
-  const stages = useMemo(() => {
-    let start = 0
-    const base = milestones
-      .filter(it => it.duration > 0)
-      .map((milestone: Milestone) => {
-        const object = {
-          start,
-          end: start + milestone.duration * unit - 1,
-          label: milestone.label,
-          years: milestone.duration,
-          color: milestone.color
-        }
-        start += milestone.duration * unit
-        return object
-      })
-    const lastItem = base[base.length - 1]
-    base.push({
-      start: lastItem.end,
-      end: liveDays - 1,
-      color: 'bg-green-200',
-      label: '平凡的一天',
-      years: -1
-    })
-    base.push({
-      start: liveDays,
-      end: liveDays,
-      color: 'bg-sky-600',
-      label: '今天',
-      years: -1
-    })
-    return base
-  }, [unit, liveDays, milestones])
 
   const getBackgroundColor = useCallback((day: number) => {
     // 今天
@@ -142,14 +122,36 @@ export default function Home() {
       return 'bg-slate-200'
     }
 
-    for (const obj of stages) {
-      if (day >= obj.start && day <= obj.end) {
-        return obj.color
+    if (birthday) {
+      let date = new Date()
+      switch (unit) {
+        case 365: {
+          date = addDays(birthday, day)
+          break
+        }
+        case 52: {
+          date = addWeeks(birthday, day)
+          break
+        }
+        case 12: {
+          date = addMonths(birthday, day)
+          break
+        }
+        case 1: {
+          date = addYears(birthday, day)
+          break
+        }
+      }
+      for (const obj of milestones) {
+        if (isEqual(obj.startDate || date, date) ||
+          (isBefore(date, obj.endDate || date) && isAfter(date, obj.startDate || date))) {
+          return obj.color
+        }
       }
     }
 
     return 'bg-green-200'
-  }, [stages, liveDays])
+  }, [liveDays, milestones, birthday])
 
 
   const rectangles = useMemo(() => {
@@ -177,7 +179,7 @@ export default function Home() {
         }
       }
 
-      const stage = stages.find(item => item.color === backgroundColor)
+      const stage = milestones.find(item => item.color === backgroundColor)
       return <Rectangle
         key={it}
         date={validDate ? (date && format(date, 'yyyy-MM-dd')) : undefined}
@@ -192,7 +194,7 @@ export default function Home() {
         }
       />
     })
-  }, [getBackgroundColor, array, unit, validDate, birthday, stages])
+  }, [getBackgroundColor, array, unit, validDate, birthday, milestones])
 
   const aliveDisplay = useMemo(() => {
     if (validDate && birthday) {
@@ -244,21 +246,18 @@ export default function Home() {
 
   const timelineItems = useMemo(() => {
     if (validDate) {
-      let accumulate = 0
-      return stages.filter(it => it.years >= 0)
+      return milestones
         .map(it => {
-          const object = {
-            startDate: format(addYears(birthday!, accumulate), 'yyyy-MM-dd'),
+          return {
+            startDate: it.startDate,
             label: it.label,
             color: it.color
           }
-          accumulate += it.years
-          return object
         })
     } else {
       return []
     }
-  }, [stages, validDate, birthday])
+  }, [validDate, milestones])
 
   const createQueryString = useCallback(
     (name: string, value: string) => {
@@ -324,18 +323,21 @@ export default function Home() {
           </div>
           <div className='flex items-center gap-8 flex-wrap'>
             {
-              milestones.map(it => (
-                <div className='flex gap-1 items-center cursor-pointer' onClick={() => {
-                  customMilestoneRef.current?.open({
-                    label: it.label,
-                    color: it.color,
-                    unit: it.unit,
-                    duration: it.duration,
-                    startDate: birthday
-                  })
-                }} key={it.label}>
-                  <Rectangle backgroundColor={it.color} key={it.label}/>
+              milestones.map((it, index) => (
+                <div className='flex gap-1 items-center' key={it.label}>
+                  <Rectangle className='cursor-pointer' backgroundColor={it.color} key={it.label} onClick={() => {
+                    if (it.startDate) {
+                      customMilestoneRef.current?.open({
+                        label: it.label,
+                        color: it.color,
+                        startDate: birthday
+                      })
+                    }
+                  }} />
                   <p>{it.label}</p>
+                  {
+                    it.startDate && <FontAwesomeIcon icon={faClose} onClick={() => removeMilestone(index)}/>
+                  }
                 </div>
               ))
             }
@@ -361,7 +363,7 @@ export default function Home() {
                     timelineItems.map((it) => (
                       <TimelineItem>
                         <TimelineOppositeContent color="text.secondary">
-                          {it.startDate}
+                          {it.startDate && format(it.startDate, 'yyyy-MM-dd')}
                         </TimelineOppositeContent>
                         <TimelineSeparator>
                           <TimelineDot

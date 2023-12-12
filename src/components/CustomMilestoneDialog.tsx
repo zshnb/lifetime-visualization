@@ -3,23 +3,20 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle, FormControl, FormControlLabel,
-  FormLabel, Radio, RadioGroup,
+  DialogTitle,
   TextField
 } from "@mui/material";
 import {FormEvent, forwardRef, Ref, useImperativeHandle, useState} from "react";
-import {AdapterDateFns} from "@mui/x-date-pickers/AdapterDateFns";
-import {DatePicker, LocalizationProvider} from "@mui/x-date-pickers";
 import {Sketch} from "@uiw/react-color";
+import DateRangePicker from "@/components/DateRangePicker";
 
 export type CustomMilestoneDialogProps = {
   onAddMilestone: (item: Milestone) => void
 }
 export type Milestone = {
   label: string
-  unit: number
-  duration: number
   startDate?: Date
+  endDate?: Date
   color: string
 }
 export type CustomMilestoneDialogRef = {
@@ -28,22 +25,17 @@ export type CustomMilestoneDialogRef = {
 function CustomMilestoneDialogComponent(props: CustomMilestoneDialogProps, ref: Ref<CustomMilestoneDialogRef>) {
   const [open, setOpen] = useState(false)
   const [label, setLabel] = useState('')
-  const [unit, setUnit] = useState(1)
   const [date, setDate] = useState<Date | undefined>(undefined)
-  const [duration, setDuration] = useState(1)
   const [color, setColor] = useState('#000')
   const [nameError, setNameError] = useState(false)
-  const [dateError, setDateError] = useState(false)
+  const [dateRange, setDateRange] = useState<Date[]>([])
 
   useImperativeHandle(ref, () => ({
     open: (milestone: Partial<Milestone>) => {
       console.log('milestone', milestone)
       setOpen(true)
       milestone.label && setLabel(milestone.label)
-      milestone.startDate && setDate(milestone.startDate)
-      milestone.duration && setDuration(milestone.duration)
       milestone.color && setColor(milestone.color)
-      milestone.unit && setUnit(milestone.unit)
     }
   }), []);
 
@@ -58,14 +50,11 @@ function CustomMilestoneDialogComponent(props: CustomMilestoneDialogProps, ref: 
       return
     }
     if (!date) {
-      setDateError(true)
       return
     }
 
     props.onAddMilestone({
       label,
-      unit,
-      duration,
       startDate: date,
       color
     })
@@ -78,7 +67,7 @@ function CustomMilestoneDialogComponent(props: CustomMilestoneDialogProps, ref: 
         人生里程碑
       </DialogTitle>
       <DialogContent>
-        <form className='flex flex-col gap-y-2 pt-2 w-1/2'>
+        <form className='flex flex-col gap-y-4 pt-2'>
           <div>
             <TextField
               label="名称"
@@ -91,41 +80,7 @@ function CustomMilestoneDialogComponent(props: CustomMilestoneDialogProps, ref: 
                 setLabel(e.target.value)
               }}/>
           </div>
-          <FormControl>
-            <FormLabel>显示粒度</FormLabel>
-            <RadioGroup row value={unit} onChange={(e) => {
-              setUnit(parseInt(e.target.value))
-            }}>
-              <FormControlLabel value={365} control={<Radio/>} label="日"/>
-              <FormControlLabel value={52} control={<Radio/>} label="周"/>
-              <FormControlLabel value={12} control={<Radio/>} label="月"/>
-              <FormControlLabel value={1} control={<Radio/>} label="年"/>
-            </RadioGroup>
-          </FormControl>
-          <div>
-            <TextField
-              label="持续时间"
-              required
-              variant="outlined"
-              className='w-full'
-              type='number'
-              value={duration}
-              onChange={(e) => {
-                setDuration(Math.max(1, parseInt(e.target.value)))
-              }}/>
-          </div>
-          <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <DatePicker
-              format='yyyy-MM-dd'
-              className='w-full'
-              label='日期'
-              value={date}
-              onChange={value => {
-                if (value) {
-                  setDate(value)
-                }
-              }}/>
-          </LocalizationProvider>
+          <DateRangePicker onAccept={(range: Date[]) => setDateRange(range)}/>
           <Sketch color={color} onChange={newShade => setColor(newShade.hex)}/>
         </form>
       </DialogContent>

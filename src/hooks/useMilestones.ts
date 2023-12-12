@@ -1,69 +1,51 @@
 import {useCallback, useState} from "react";
 import {Milestone} from "@/components/CustomMilestoneDialog";
 import {hexColorToTw} from "@/utils/colorUtil";
+import {addDays, addYears} from "date-fns";
 
+const defaultMilestoneDurationYears = [3, 3, 6, 3, 3, 4, 3, 4]
 export default function useMilestones() {
   const [unit, setUnit] = useState(12)
   const [milestones, setMilestones] = useState<Milestone[]>([
     {
       label: '出生',
       color: 'bg-zinc-400',
-      duration: 3,
-      unit: 1,
     },
     {
       label: '幼儿园',
       color: 'bg-red-600',
-      duration: 3,
-      unit: 1,
     },
     {
       label: '小学',
       color: 'bg-orange-400',
-      duration: 6,
-      unit: 1,
     },
     {
       label: '初中',
       color: 'bg-yellow-400',
-      duration: 3,
-      unit: 1,
     },
     {
       label: '高中',
       color: 'bg-rose-400',
-      duration: 3,
-      unit: 1,
     },
     {
       label: '大学本科',
       color: 'bg-cyan-400',
-      duration: 4,
-      unit: 1,
     },
     {
       label: '硕士',
       color: 'bg-pink-400',
-      duration: 3,
-      unit: 1,
     },
     {
       label: '博士',
       color: 'bg-lime-400',
-      duration: 4,
-      unit: 1,
     },
     {
       label: '平凡的一天',
       color: 'bg-green-200',
-      duration: -1,
-      unit: 1
     },
     {
       label: '今天',
       color: 'bg-sky-600',
-      duration: -1,
-      unit: 1
     },
   ])
 
@@ -71,12 +53,33 @@ export default function useMilestones() {
     setMilestones([...milestones, {
       label: milestone.label,
       color: hexColorToTw(milestone.color),
-      duration: milestone.duration,
-      unit: milestone.unit
     }])
+  }, [])
+
+  const removeMilestone = useCallback((index: number) => {
+    milestones.splice(index, 1)
+    setMilestones([...milestones])
+  }, [])
+
+  const confirmDefaultMilestone = useCallback((birthday: Date) => {
+    let pastYears = 0
+    const newMilestones: Milestone[] = milestones.map(((it, index) => {
+      const object = {
+        ...it,
+        startDate: index < defaultMilestoneDurationYears.length ? addYears(birthday, pastYears) : undefined,
+        endDate: index < defaultMilestoneDurationYears.length ?
+          addYears(birthday, defaultMilestoneDurationYears[index] + pastYears) :
+          undefined
+      }
+      pastYears += defaultMilestoneDurationYears[index]
+      return object
+    }))
+    setMilestones(newMilestones)
   }, [])
   return {
     milestones,
-    addMilestone
+    addMilestone,
+    removeMilestone,
+    confirmDefaultMilestone
   }
 }
