@@ -181,7 +181,7 @@ export default function Home() {
         }
       }
 
-      const validMilestones = milestones.find(item =>
+      const validMilestones = milestones.filter(item =>
         isEqual(item.startDate!, date) ||
         (isBefore(date, item.endDate || date) && isAfter(date, item.startDate || date))
       )
@@ -192,14 +192,7 @@ export default function Home() {
           customMilestoneRef.current?.open({})
         }}
         backgroundColor={backgroundColor}
-        stage={
-          validMilestones && (
-            <div className='flex gap-1 items-center'>
-              <Rectangle backgroundColor={validMilestones.color}/>
-              <p>{validMilestones.label}</p>
-            </div>
-          )
-        }
+        milestones={validMilestones}
       />
     })
   }, [getBackgroundColor, array, unit, validDate, birthday, milestones])

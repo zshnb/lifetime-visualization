@@ -30,7 +30,7 @@ export default function useMilestones() {
       color: 'bg-cyan-400',
     },
     {
-      label: '平凡的一天',
+      label: '日常',
       color: 'bg-green-200',
     },
     {
@@ -40,7 +40,6 @@ export default function useMilestones() {
   ])
 
   const addMilestone = useCallback((milestone: Milestone) => {
-    console.log('add milestone', milestone)
     milestones.splice(milestones.length - 2, 0, milestone)
     milestones.sort((a: Milestone, b: Milestone) => {
       if (isBefore(a.startDate!, b.startDate!)) {

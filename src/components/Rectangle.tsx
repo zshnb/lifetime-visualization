@@ -1,10 +1,11 @@
 import {JSX, useEffect, useMemo, useState} from "react";
 import {buildLinearGradient} from "@/utils/colorUtil";
+import {Milestone} from "@/components/CustomMilestoneDialog";
 
 export interface RectangleProps {
   backgroundColor?: string[] | string
   date?: string
-  stage?: JSX.Element
+  milestones?: Milestone[]
   onClick?: () => void
   className?: string
 }
@@ -34,7 +35,10 @@ export default function Rectangle(props: RectangleProps) {
           const colors1 = buildLinearGradient(props.backgroundColor[0], props.backgroundColor[1])
           const colors2 = buildLinearGradient(props.backgroundColor[2], props.backgroundColor[3])
           return {
-            background: `linear-gradient(to right, ${colors1}), linear-gradient(to right, ${colors2});`
+            background: `linear-gradient(to right, ${colors1}), linear-gradient(to right, ${colors2});`,
+            backgroundSize: '100% 50%',
+            backgroundPosition: 'center top, center bottom',
+            backgroundRepeat: 'no-repeat'
           }
         }
       }
@@ -46,6 +50,7 @@ export default function Rectangle(props: RectangleProps) {
   }, [props.backgroundColor])
 
   useEffect(() => {
+    console.log(`date: ${props.date}, style: ${JSON.stringify(style)}`)
   }, [style])
   return (
     <div
@@ -56,12 +61,19 @@ export default function Rectangle(props: RectangleProps) {
       style={style}
     >
       {
-        props.stage && (
+        props.milestones && (
           <div
             className={`absolute border border-gray-300 -top-16 flex-col ${hover ? 'flex' : 'hidden'} w-[300px] p-4 rounded z-10 bg-white`}>
-            <div className='flex gap-2'>
-              {props.stage}
-              <p>今天是{props.date}</p>
+            <div className='flex flex-col gap-x-2'>
+              {
+                props.milestones.map(it => (
+                  <div className='flex gap-1 items-center'>
+                    <Rectangle backgroundColor={it.color}/>
+                    <p>{it.label}</p>
+                    <p>今天是{props.date}</p>
+                  </div>
+                ))
+              }
             </div>
           </div>
         )
