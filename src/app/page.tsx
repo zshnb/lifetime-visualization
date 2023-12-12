@@ -151,10 +151,11 @@ export default function Home() {
     }
 
     return 'bg-green-200'
-  }, [liveDays, milestones, birthday])
+  }, [liveDays, milestones, birthday, unit])
 
 
   const rectangles = useMemo(() => {
+    console.log('update rectangle', milestones)
     return array.map((it) => {
       const backgroundColor = getBackgroundColor(it)
       let date
@@ -183,6 +184,9 @@ export default function Home() {
       return <Rectangle
         key={it}
         date={validDate ? (date && format(date, 'yyyy-MM-dd')) : undefined}
+        onClick={() => {
+          customMilestoneRef.current?.open({})
+        }}
         backgroundColor={backgroundColor}
         stage={
           stage && (
@@ -246,14 +250,13 @@ export default function Home() {
 
   const timelineItems = useMemo(() => {
     if (validDate) {
-      return milestones
-        .map(it => {
-          return {
-            startDate: it.startDate,
-            label: it.label,
-            color: it.color
-          }
-        })
+      return milestones.map(it => {
+        return {
+          startDate: it.startDate,
+          label: it.label,
+          color: it.color
+        }
+      })
     } else {
       return []
     }
@@ -283,6 +286,7 @@ export default function Home() {
   }, []);
 
   const customMilestoneRef = useRef<CustomMilestoneDialogRef>(null)
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   return (
     <ThemeProvider theme={theme}>
       <header className='px-20 pt-2 flex justify-between items-center'>
@@ -323,24 +327,34 @@ export default function Home() {
           </div>
           <div className='flex items-center gap-8 flex-wrap'>
             {
-              milestones.map((it, index) => (
-                <div className='flex gap-1 items-center' key={it.label}>
-                  <Rectangle className='cursor-pointer' backgroundColor={it.color} key={it.label} onClick={() => {
-                    if (it.startDate) {
-                      customMilestoneRef.current?.open({
-                        label: it.label,
-                        color: it.color,
-                        startDate: it.startDate,
-                        endDate: it.endDate
-                      })
+              milestones.map((it, index) => {
+                return (
+                  <div
+                    className='flex gap-1 items-center'
+                    key={it.label}
+                    onMouseEnter={() => setHoveredIndex(index)}
+                    onMouseLeave={() => setHoveredIndex(null)}
+                  >
+                    <Rectangle className='cursor-pointer' backgroundColor={it.color} key={it.label} onClick={() => {
+                      if (it.startDate) {
+                        customMilestoneRef.current?.open({
+                          label: it.label,
+                          color: it.color,
+                          startDate: it.startDate,
+                          endDate: it.endDate
+                        })
+                      }
+                    }}/>
+                    <p>{it.label}</p>
+                    {
+                      it.startDate && (
+                        <FontAwesomeIcon className={`${hoveredIndex === index ? 'inline' : 'hidden'}`} icon={faClose}
+                                         onClick={() => removeMilestone(index)}/>
+                      )
                     }
-                  }} />
-                  <p>{it.label}</p>
-                  {
-                    it.startDate && <FontAwesomeIcon icon={faClose} onClick={() => removeMilestone(index)}/>
-                  }
-                </div>
-              ))
+                  </div>
+                )
+              })
             }
           </div>
           {

@@ -50,16 +50,15 @@ export default function useMilestones() {
   ])
 
   const addMilestone = useCallback((milestone: Milestone) => {
-    setMilestones([...milestones, {
-      label: milestone.label,
-      color: hexColorToTw(milestone.color),
-    }])
-  }, [])
+    console.log('add milestone', milestone)
+    milestones.splice(milestones.length - 2, 0, milestone)
+    setMilestones([...milestones])
+  }, [milestones])
 
   const removeMilestone = useCallback((index: number) => {
     milestones.splice(index, 1)
     setMilestones([...milestones])
-  }, [])
+  }, [milestones])
 
   const confirmDefaultMilestone = useCallback((birthday: Date) => {
     let pastYears = 0

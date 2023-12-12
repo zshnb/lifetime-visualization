@@ -10,10 +10,12 @@ export interface RectangleProps {
 export default function Rectangle(props: RectangleProps) {
   const [hover, setHover] = useState(false)
   return (
-    <div className={`relative w-4 h-4 border-0 rounded ${props.backgroundColor} ${props.className}`}
-         onMouseEnter={() => setHover(true)}
-         onMouseLeave={() => setHover(false)}
-         onClick={props.onClick}
+    <div
+      className={`relative w-4 h-4 border-0 rounded ${props.backgroundColor} ${props.className}`}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      onClick={props.onClick}
+      style={{backgroundColor: props.backgroundColor}}
     >
       {
         props.stage && (
