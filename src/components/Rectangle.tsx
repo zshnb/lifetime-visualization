@@ -16,7 +16,7 @@ export default function Rectangle(props: RectangleProps) {
            onClick={props.onClick}
       >
         {
-          props.date && (
+          props.stage && (
             <div
               className={`absolute border border-gray-300 -top-16 flex-col ${hover ? 'flex' : 'hidden'} w-[300px] p-4 rounded z-10 bg-white`}>
               <div className='flex gap-2'>

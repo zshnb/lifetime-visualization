@@ -16,10 +16,10 @@ export type CustomMilestoneDialogProps = {
   onAddMilestone: (item: Milestone) => void
 }
 export type Milestone = {
-  name: string
+  label: string
   unit: number
   duration: number
-  startDate: Date
+  startDate?: Date
   color: string
 }
 export type CustomMilestoneDialogRef = {
@@ -27,7 +27,7 @@ export type CustomMilestoneDialogRef = {
 }
 function CustomMilestoneDialogComponent(props: CustomMilestoneDialogProps, ref: Ref<CustomMilestoneDialogRef>) {
   const [open, setOpen] = useState(false)
-  const [name, setName] = useState('')
+  const [label, setLabel] = useState('')
   const [unit, setUnit] = useState(1)
   const [date, setDate] = useState<Date | undefined>(undefined)
   const [duration, setDuration] = useState(1)
@@ -39,7 +39,7 @@ function CustomMilestoneDialogComponent(props: CustomMilestoneDialogProps, ref: 
     open: (milestone: Partial<Milestone>) => {
       console.log('milestone', milestone)
       setOpen(true)
-      milestone.name && setName(milestone.name)
+      milestone.label && setLabel(milestone.label)
       milestone.startDate && setDate(milestone.startDate)
       milestone.duration && setDuration(milestone.duration)
       milestone.color && setColor(milestone.color)
@@ -53,7 +53,7 @@ function CustomMilestoneDialogComponent(props: CustomMilestoneDialogProps, ref: 
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
-    if (!name) {
+    if (!label) {
       setNameError(true)
       return
     }
@@ -63,7 +63,7 @@ function CustomMilestoneDialogComponent(props: CustomMilestoneDialogProps, ref: 
     }
 
     props.onAddMilestone({
-      name,
+      label,
       unit,
       duration,
       startDate: date,
@@ -84,11 +84,11 @@ function CustomMilestoneDialogComponent(props: CustomMilestoneDialogProps, ref: 
               label="名称"
               variant="outlined"
               required
-              value={name}
+              value={label}
               error={nameError}
               className='w-full'
               onChange={(e) => {
-                setName(e.target.value)
+                setLabel(e.target.value)
               }}/>
           </div>
           <FormControl>

@@ -18,8 +18,6 @@ import {
   FormControl,
   FormControlLabel,
   FormLabel,
-  InputLabel,
-  MenuItem,
   Radio,
   RadioGroup,
   Select, Stack,
@@ -33,29 +31,22 @@ import {
   TimelineOppositeContent, TimelineSeparator
 } from "@mui/lab";
 import {usePathname, useRouter, useSearchParams} from "next/navigation";
-import {
-  primarySchoolYear,
-  juniorSchoolYear,
-  highSchoolYear,
-  bachelorSchoolYear,
-  masterSchoolYear,
-  doctorSchoolYear,
-  technicalCollegeYear,
-  kindergartenYear
-} from "@/app/constant";
 import CustomMilestoneDialog, {CustomMilestoneDialogRef, Milestone} from "@/components/CustomMilestoneDialog";
 import useMilestones from "@/hooks/useMilestones";
 import {twColorToHex} from "@/utils/colorUtil";
 
 export default function Home() {
   const [maxYear, setMaxYear] = useState(80)
-  const [birthday, setBirthday] = useState<Date | undefined>(new Date(1996, 4, 24))
-  const [degree, setDegree] = useState<number | undefined>()
+  const [birthday, setBirthday] = useState<Date | undefined>(undefined)
   const [unit, setUnit] = useState(12)
   const [validDate, setValidDate] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
   const pathname = usePathname()
+
+  const array = useMemo(() => {
+    return Array.from({length: unit * maxYear}, (v, k) => k)
+  }, [unit, maxYear])
 
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
 
@@ -106,121 +97,43 @@ export default function Home() {
     }
     return days;
   }, [unit, validDate, birthday, maxYear])
+  const {milestones, addMilestone} = useMilestones()
 
-  const technicalCollegeStage = useMemo(() => {
-    return {
-      start: (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear) * unit,
-      end: (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear + technicalCollegeYear) * unit - 1,
-      backgroundColor: 'bg-purple-400',
-      label: '大学专科',
-      years: primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear
-    }
-  }, [unit])
-
-  const bachelorSchoolStage = useMemo(() => {
-    return {
-      start: (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear) * unit,
-      end: (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear + bachelorSchoolYear) * unit - 1,
-      backgroundColor: 'bg-cyan-400',
-      label: '大学本科',
-      years: primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear
-    }
-  }, [unit])
-
-  const masterSchoolStage = useMemo(() => {
-    return {
-      start: (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear + bachelorSchoolYear) * unit,
-      end: (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear + bachelorSchoolYear + masterSchoolYear) * unit - 1,
-      backgroundColor: 'bg-pink-400',
-      label: '硕士',
-      years: primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear + bachelorSchoolYear
-    }
-  }, [unit])
-
-  const doctorSchoolStage = useMemo(() => {
-    return {
-      start: (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear + bachelorSchoolYear + masterSchoolYear) * unit,
-      end: (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear + bachelorSchoolYear + masterSchoolYear + doctorSchoolYear) * unit - 1,
-      backgroundColor: 'bg-lime-400',
-      label: '博士',
-      years: primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear + bachelorSchoolYear + masterSchoolYear
-    }
-  }, [unit])
-  const stageWithIndex = useMemo(() => {
-    const base = [
-      {
-        start: 0,
-        end: kindergartenYear * unit - 1,
-        backgroundColor: 'bg-zinc-400',
-        label: '出生',
-        years: 0
-      },
-      {
-        start: kindergartenYear * unit,
-        end: primarySchoolYear * unit - 1,
-        backgroundColor: 'bg-red-600',
-        label: '幼儿园',
-        years: kindergartenYear
-      },
-      {
-        start: primarySchoolYear * unit,
-        end: (primarySchoolYear + primarySchoolYear) * unit - 1,
-        backgroundColor: 'bg-orange-400',
-        label: '小学',
-        years: primarySchoolYear
-      },
-      {
-        start: (primarySchoolYear + primarySchoolYear) * unit,
-        end: (primarySchoolYear + primarySchoolYear + juniorSchoolYear) * unit - 1,
-        backgroundColor: 'bg-yellow-400',
-        label: '初中',
-        years: primarySchoolYear + primarySchoolYear
-      },
-      {
-        start: (primarySchoolYear + primarySchoolYear + juniorSchoolYear) * unit,
-        end: (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear) * unit - 1,
-        backgroundColor: 'bg-rose-400',
-        label: '高中',
-        years: primarySchoolYear + primarySchoolYear + juniorSchoolYear
-      },
-    ]
-    switch (degree) {
-      case 1: {
-        base.push(technicalCollegeStage)
-        break
-      }
-      case 2: {
-        base.push(bachelorSchoolStage)
-        break
-      }
-      case 3: {
-        base.push(bachelorSchoolStage, masterSchoolStage)
-        break
-      }
-      case 4: {
-        base.push(bachelorSchoolStage, masterSchoolStage, doctorSchoolStage)
-        break
-      }
-    }
+  const stages = useMemo(() => {
+    let start = 0
+    const base = milestones
+      .filter(it => it.duration > 0)
+      .map((milestone: Milestone) => {
+        const object = {
+          start,
+          end: start + milestone.duration * unit - 1,
+          label: milestone.label,
+          years: milestone.duration,
+          color: milestone.color
+        }
+        start += milestone.duration * unit
+        return object
+      })
     const lastItem = base[base.length - 1]
     base.push({
       start: lastItem.end,
       end: liveDays - 1,
-      backgroundColor: 'bg-green-200',
+      color: 'bg-green-200',
       label: '平凡的一天',
       years: -1
     })
     base.push({
       start: liveDays,
       end: liveDays,
-      backgroundColor: 'bg-sky-600',
+      color: 'bg-sky-600',
       label: '今天',
       years: -1
     })
     return base
-  }, [unit, degree, liveDays])
+  }, [unit, liveDays, milestones])
 
   const getBackgroundColor = useCallback((day: number) => {
+    console.log(stages)
     // 今天
     if (day === liveDays) {
       return 'bg-sky-600'
@@ -230,20 +143,15 @@ export default function Home() {
       return 'bg-slate-200'
     }
 
-    for (const obj of stageWithIndex) {
+    for (const obj of stages) {
       if (day >= obj.start && day <= obj.end) {
-        return obj.backgroundColor
+        return obj.color
       }
     }
 
     return 'bg-green-200'
-  }, [stageWithIndex, liveDays])
+  }, [stages, liveDays])
 
-  const {milestones, addMilestone} = useMilestones()
-
-  const array = useMemo(() => {
-    return Array.from({length: unit * maxYear}, (v, k) => k)
-  }, [unit, maxYear])
 
   const rectangles = useMemo(() => {
     return array.map((it) => {
@@ -270,7 +178,7 @@ export default function Home() {
         }
       }
 
-      const stage = stageWithIndex.find(item => it >= item.start && it <= item.end)
+      const stage = stages.find(item => item.color === backgroundColor)
       return <Rectangle
         key={it}
         date={validDate ? (date && format(date, 'yyyy-MM-dd')) : undefined}
@@ -278,14 +186,14 @@ export default function Home() {
         stage={
           stage && (
             <div className='flex gap-1 items-center'>
-              <Rectangle backgroundColor={stage.backgroundColor}/>
+              <Rectangle backgroundColor={stage.color}/>
               <p>{stage.label}</p>
             </div>
           )
         }
       />
     })
-  }, [getBackgroundColor, array, unit, validDate, birthday, stageWithIndex])
+  }, [getBackgroundColor, array, unit, validDate, birthday, stages])
 
   const aliveDisplay = useMemo(() => {
     if (validDate && birthday) {
@@ -337,18 +245,18 @@ export default function Home() {
 
   const timelineItems = useMemo(() => {
     if (validDate) {
-      return stageWithIndex.filter(it => it.years >= 0)
+      return stages.filter(it => it.years >= 0)
         .map(it => {
           return {
             startDate: format(addDays(birthday!, it.years * 365), 'yyyy-MM-dd'),
             label: it.label,
-            backgroundColor: it.backgroundColor
+            color: it.color
           }
         })
     } else {
       return []
     }
-  }, [stageWithIndex, validDate, birthday])
+  }, [stages, validDate, birthday])
 
   const createQueryString = useCallback(
     (name: string, value: string) => {
@@ -399,15 +307,6 @@ export default function Home() {
                 setMaxYear(parseInt(e.target.value))
                 router.push(pathname + '?' + createQueryString('maxYear', e.target.value))
               }}/>
-            <FormControl fullWidth>
-              <InputLabel>最高学历</InputLabel>
-              <Select value={degree} onChange={(e) => setDegree(e.target.value as number)} label="最高学历">
-                <MenuItem value={1}>专科</MenuItem>
-                <MenuItem value={2}>本科</MenuItem>
-                <MenuItem value={3}>硕士</MenuItem>
-                <MenuItem value={4}>博士</MenuItem>
-              </Select>
-            </FormControl>
             <FormControl>
               <FormLabel>显示粒度</FormLabel>
               <RadioGroup row value={unit} onChange={(e) => {
@@ -426,14 +325,14 @@ export default function Home() {
               milestones.map(it => (
                 <div className='flex gap-1 items-center cursor-pointer' onClick={() => {
                   customMilestoneRef.current?.open({
-                    name: it.label,
-                    color: it.backgroundColor,
+                    label: it.label,
+                    color: it.color,
                     unit: it.unit,
                     duration: it.duration,
                     startDate: birthday
                   })
                 }} key={it.label}>
-                  <Rectangle backgroundColor={it.backgroundColor} key={it.label}/>
+                  <Rectangle backgroundColor={it.color} key={it.label}/>
                   <p>{it.label}</p>
                 </div>
               ))
@@ -464,7 +363,7 @@ export default function Home() {
                         </TimelineOppositeContent>
                         <TimelineSeparator>
                           <TimelineDot
-                            sx={{color: twColorToHex(it.backgroundColor), backgroundColor: twColorToHex(it.backgroundColor)}}/>
+                            sx={{color: twColorToHex(it.color), backgroundColor: twColorToHex(it.color)}}/>
                           <TimelineConnector/>
                         </TimelineSeparator>
                         <TimelineContent>{it.label}</TimelineContent>
