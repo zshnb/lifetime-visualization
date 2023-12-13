@@ -188,10 +188,12 @@ export default function Home() {
 
       const validMilestones = milestones.filter(item =>
         isEqual(item.startDate!, date) ||
-        (isBefore(date, item.endDate || date) && isAfter(date, item.startDate || date))
+        (
+          isBefore(date, item.endDate || date) &&
+          isAfter(date, item.startDate || date) &&
+          isBefore(item.startDate!, new Date())
+        )
       )
-      // console.log(`date: ${date}`)
-      // console.log('milestones', milestones)
       return <Rectangle
         key={it}
         date={validDate ? date : undefined}
@@ -258,7 +260,7 @@ export default function Home() {
 
   const timelineItems = useMemo(() => {
     if (validDate) {
-      return milestones.filter(it => it.startDate !== undefined)
+      return milestones.filter(it => it.startDate !== undefined && isBefore(it.startDate, new Date()))
         .map(it => {
           return {
             startDate: it.startDate,
