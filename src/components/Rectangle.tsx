@@ -1,5 +1,5 @@
-import {JSX, useEffect, useMemo, useState} from "react";
-import {buildLinearGradient} from "@/utils/colorUtil";
+import {useMemo, useState} from "react";
+import {buildLinearGradient, twColorToHex} from "@/utils/colorUtil";
 import {Milestone} from "@/components/CustomMilestoneDialog";
 
 export interface RectangleProps {
@@ -9,6 +9,7 @@ export interface RectangleProps {
   onClick?: () => void
   className?: string
 }
+
 export default function Rectangle(props: RectangleProps) {
   const [hover, setHover] = useState(false)
   const style = useMemo(() => {
@@ -35,7 +36,7 @@ export default function Rectangle(props: RectangleProps) {
           const colors1 = buildLinearGradient(props.backgroundColor[0], props.backgroundColor[1])
           const colors2 = buildLinearGradient(props.backgroundColor[2], props.backgroundColor[3])
           return {
-            background: `linear-gradient(to right, ${colors1}), linear-gradient(to right, ${colors2});`,
+            background: `linear-gradient(to right, ${colors1}), linear-gradient(to right, ${colors2})`,
             backgroundSize: '100% 50%',
             backgroundPosition: 'center top, center bottom',
             backgroundRepeat: 'no-repeat'
@@ -44,14 +45,11 @@ export default function Rectangle(props: RectangleProps) {
       }
     } else {
       return {
-        backgroundColor: props.backgroundColor as string
+        backgroundColor: twColorToHex(props.backgroundColor as string)
       }
     }
   }, [props.backgroundColor])
 
-  useEffect(() => {
-    console.log(`date: ${props.date}, style: ${JSON.stringify(style)}`)
-  }, [style])
   return (
     <div
       className={`relative w-4 h-4 border-0 rounded ${props.backgroundColor} ${props.className}`}
