@@ -2,102 +2,66 @@
 import Rectangle from "@/components/Rectangle";
 import {DatePicker, LocalizationProvider} from "@mui/x-date-pickers";
 import {AdapterDateFns} from "@mui/x-date-pickers/AdapterDateFns";
-import {useCallback, useEffect, useMemo, useState} from "react";
+import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {
   addDays,
   addMonths,
   addWeeks,
   addYears,
   differenceInDays,
-  differenceInMonths, differenceInWeeks,
+  differenceInMonths,
+  differenceInWeeks,
   differenceInYears,
-  format, min
+  format,
+  isAfter,
+  isBefore, isEqual,
+  min
 } from "date-fns";
 import {
   createTheme,
   FormControl,
   FormControlLabel,
   FormLabel,
-  InputLabel,
-  MenuItem,
   Radio,
   RadioGroup,
-  Select, Stack,
-  TextField, ThemeProvider, useMediaQuery
+  Stack,
+  TextField,
+  ThemeProvider,
+  useMediaQuery
 } from "@mui/material";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faGithub} from '@fortawesome/free-brands-svg-icons'
+import {faClose} from '@fortawesome/free-solid-svg-icons'
 import {useDebouncedCallback} from "use-debounce";
-import {Timeline, TimelineConnector, TimelineContent, TimelineDot, TimelineItem,
-  TimelineOppositeContent, TimelineSeparator} from "@mui/lab";
+import {
+  Timeline,
+  TimelineConnector,
+  TimelineContent,
+  TimelineDot,
+  TimelineItem,
+  TimelineOppositeContent,
+  TimelineSeparator
+} from "@mui/lab";
 import {usePathname, useRouter, useSearchParams} from "next/navigation";
-
-const kindergartenYear = 3
-const primarySchoolYear = 6
-const juniorSchoolYear = 3
-const highSchoolYear = 3
-const technicalCollegeYear = 3
-const bachelorSchoolYear = 4
-const masterSchoolYear = 3
-const doctorSchoolYear = 4
-const rectangleTypes = [
-  {
-    label: '出生',
-    backgroundColor: 'bg-zinc-400'
-  },
-  {
-    label: '幼儿园',
-    backgroundColor: 'bg-red-600'
-  },
-  {
-    label: '小学',
-    backgroundColor: 'bg-orange-400'
-  },
-  {
-    label: '初中',
-    backgroundColor: 'bg-yellow-400'
-  },
-  {
-    label: '高中',
-    backgroundColor: 'bg-rose-400'
-  },
-  {
-    label: '大学专科',
-    backgroundColor: 'bg-purple-400'
-  },
-  {
-    label: '大学本科',
-    backgroundColor: 'bg-cyan-400'
-  },
-  {
-    label: '硕士',
-    backgroundColor: 'bg-pink-400'
-  },
-  {
-    label: '博士',
-    backgroundColor: 'bg-lime-400'
-  },
-  {
-    label: '平凡的一天',
-    backgroundColor: 'bg-green-200'
-  },
-  {
-    label: '今天',
-    backgroundColor: 'bg-sky-600'
-  },
-]
+import CustomMilestoneDialog, {CustomMilestoneDialogRef, Milestone} from "@/components/CustomMilestoneDialog";
+import useMilestones from "@/hooks/useMilestones";
+import {twColorToHex} from "@/utils/colorUtil";
 
 export default function Home() {
   const [maxYear, setMaxYear] = useState(80)
-  const [birthday, setBirthday] = useState<Date | undefined>()
-  const [degree, setDegree] = useState<number | undefined>()
+  const [birthday, setBirthday] = useState<Date | undefined>(undefined)
   const [unit, setUnit] = useState(12)
   const [validDate, setValidDate] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
   const pathname = usePathname()
 
+  const array = useMemo(() => {
+    return Array.from({length: unit * maxYear}, (v, k) => k)
+  }, [unit, maxYear])
+
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+  const {milestones, addMilestone, removeMilestone, confirmDefaultMilestone} = useMilestones()
 
   const theme = useMemo(
     () =>
@@ -115,6 +79,7 @@ export default function Home() {
       try {
         format(value, 'yyyy-MM-dd')
         setValidDate(true)
+        confirmDefaultMilestone(value)
       } catch (e) {
         setValidDate(false)
       }
@@ -147,147 +112,54 @@ export default function Home() {
     return days;
   }, [unit, validDate, birthday, maxYear])
 
-  const technicalCollegeStage = useMemo(() => {
-    return {
-      start: (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear) * unit,
-      end: (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear + technicalCollegeYear) * unit - 1,
-      backgroundColor: 'bg-purple-400',
-      label: '大学专科',
-      years: primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear
-    }
-  }, [unit])
-
-  const bachelorSchoolStage = useMemo(() => {
-    return {
-      start: (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear) * unit,
-      end: (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear + bachelorSchoolYear) * unit - 1,
-      backgroundColor: 'bg-cyan-400',
-      label: '大学本科',
-      years: primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear
-    }
-  }, [unit])
-
-  const masterSchoolStage = useMemo(() => {
-    return {
-      start: (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear + bachelorSchoolYear) * unit,
-      end: (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear + bachelorSchoolYear + masterSchoolYear) * unit - 1,
-      backgroundColor: 'bg-pink-400',
-      label: '硕士',
-      years: primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear + bachelorSchoolYear
-    }
-  }, [unit])
-
-  const doctorSchoolStage = useMemo(() => {
-    return {
-      start: (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear + bachelorSchoolYear + masterSchoolYear) * unit,
-      end: (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear + bachelorSchoolYear + masterSchoolYear + doctorSchoolYear) * unit - 1,
-      backgroundColor: 'bg-lime-400',
-      label: '博士',
-      years: primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear + bachelorSchoolYear + masterSchoolYear
-    }
-  }, [unit])
-  const stageWithIndex = useMemo(() => {
-    const base = [
-      {
-        start: 0,
-        end: kindergartenYear * unit - 1,
-        backgroundColor: 'bg-zinc-400',
-        label: '出生',
-        years: 0
-      },
-      {
-        start: kindergartenYear * unit,
-        end: primarySchoolYear * unit - 1,
-        backgroundColor: 'bg-red-600',
-        label: '幼儿园',
-        years: kindergartenYear
-      },
-      {
-        start: primarySchoolYear * unit,
-        end: (primarySchoolYear + primarySchoolYear) * unit - 1,
-        backgroundColor: 'bg-orange-400',
-        label: '小学',
-        years: primarySchoolYear
-      },
-      {
-        start: (primarySchoolYear + primarySchoolYear) * unit,
-        end: (primarySchoolYear + primarySchoolYear + juniorSchoolYear) * unit - 1,
-        backgroundColor: 'bg-yellow-400',
-        label: '初中',
-        years: primarySchoolYear + primarySchoolYear
-      },
-      {
-        start: (primarySchoolYear + primarySchoolYear + juniorSchoolYear) * unit,
-        end:  (primarySchoolYear + primarySchoolYear + juniorSchoolYear + highSchoolYear) * unit - 1,
-        backgroundColor: 'bg-rose-400',
-        label: '高中',
-        years: primarySchoolYear + primarySchoolYear + juniorSchoolYear
-      },
-    ]
-    switch (degree) {
-      case 1: {
-        base.push(technicalCollegeStage)
-        break
-      }
-      case 2: {
-        base.push(bachelorSchoolStage)
-        break
-      }
-      case 3: {
-        base.push(bachelorSchoolStage, masterSchoolStage)
-        break
-      }
-      case 4: {
-        base.push(bachelorSchoolStage, masterSchoolStage, doctorSchoolStage)
-        break
-      }
-    }
-    const lastItem = base[base.length - 1]
-    base.push({
-      start: lastItem.end,
-      end: liveDays - 1,
-      backgroundColor: 'bg-green-200',
-      label: '平凡的一天',
-      years: -1
-    })
-    base.push({
-      start: liveDays,
-      end: liveDays,
-      backgroundColor: 'bg-sky-600',
-      label: '今天',
-      years: -1
-    })
-    return base
-  }, [unit, degree, liveDays])
-
   const getBackgroundColor = useCallback((day: number) => {
     // 今天
     if (day === liveDays) {
-      return 'bg-sky-600'
+      return twColorToHex('bg-sky-600')
     }
     // 未来
     if (day > liveDays) {
-      return 'bg-slate-200'
+      return twColorToHex('bg-slate-200')
     }
 
-    for (const obj of stageWithIndex) {
-      if (day >= obj.start && day <= obj.end) {
-        return obj.backgroundColor
+    if (birthday) {
+      let date = new Date()
+      switch (unit) {
+        case 365: {
+          date = addDays(birthday, day)
+          break
+        }
+        case 52: {
+          date = addWeeks(birthday, day)
+          break
+        }
+        case 12: {
+          date = addMonths(birthday, day)
+          break
+        }
+        case 1: {
+          date = addYears(birthday, day)
+          break
+        }
+      }
+      const colors = milestones.filter(it => {
+        return isEqual(it.startDate!, date) ||
+          (isBefore(date, it.endDate!) && isAfter(date, it.startDate!));
+      })
+        .map(it => twColorToHex(it.color))
+      if (colors.length) {
+        return colors
       }
     }
 
-    return 'bg-green-200'
-  }, [stageWithIndex, liveDays])
-
-  const array = useMemo(() => {
-    return Array.from({ length: unit * maxYear }, (v, k) => k)
-  }, [unit, maxYear])
+    return twColorToHex('bg-green-200')
+  }, [liveDays, milestones, birthday, unit])
 
 
   const rectangles = useMemo(() => {
     return array.map((it) => {
       const backgroundColor = getBackgroundColor(it)
-      let date
+      let date: Date = new Date()
       if (validDate && birthday) {
         switch (unit) {
           case 365: {
@@ -309,22 +181,24 @@ export default function Home() {
         }
       }
 
-      const stage = stageWithIndex.find(item => it >= item.start && it <= item.end)
+      const validMilestones = milestones.filter(item =>
+        isEqual(item.startDate!, date) ||
+        (isBefore(date, item.endDate || date) && isAfter(date, item.startDate || date))
+      )
       return <Rectangle
         key={it}
-        date={validDate ? (date && format(date, 'yyyy-MM-dd')) : undefined}
+        date={validDate ? format(date, 'yyyy-MM-dd') : undefined}
+        onClick={() => {
+          customMilestoneRef.current?.open({
+            startDate: date,
+            endDate: date
+          })
+        }}
         backgroundColor={backgroundColor}
-        stage={
-          stage && (
-            <div className='flex gap-1 items-center'>
-              <Rectangle backgroundColor={stage.backgroundColor}/>
-              <p>{stage.label}</p>
-            </div>
-          )
-        }
+        milestones={validMilestones}
       />
     })
-  }, [getBackgroundColor, array, unit, validDate, birthday, stageWithIndex])
+  }, [getBackgroundColor, array, unit, validDate, birthday, milestones])
 
   const aliveDisplay = useMemo(() => {
     if (validDate && birthday) {
@@ -376,18 +250,17 @@ export default function Home() {
 
   const timelineItems = useMemo(() => {
     if (validDate) {
-      return stageWithIndex.filter(it => it.years >= 0)
-        .map(it => {
+      return milestones.map(it => {
         return {
-          startDate: format(addDays(birthday!, it.years * 365), 'yyyy-MM-dd'),
+          startDate: it.startDate,
           label: it.label,
-          backgroundColor: it.backgroundColor
+          color: it.color
         }
       })
     } else {
       return []
     }
-  }, [stageWithIndex, validDate, birthday])
+  }, [validDate, milestones])
 
   const createQueryString = useCallback(
     (name: string, value: string) => {
@@ -412,6 +285,8 @@ export default function Home() {
 
   }, []);
 
+  const customMilestoneRef = useRef<CustomMilestoneDialogRef>(null)
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   return (
     <ThemeProvider theme={theme}>
       <header className='px-20 pt-2 flex justify-between items-center'>
@@ -424,7 +299,8 @@ export default function Home() {
         <div className='pb-4 flex flex-col gap-2'>
           <div className='flex flex-col items-start gap-y-2 w-1/4'>
             <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <DatePicker format='yyyy-MM-dd' className='w-full' label='生日' value={birthday} onChange={handleChangeBirthday}/>
+              <DatePicker format='yyyy-MM-dd' className='w-full' label='生日' value={birthday}
+                          onChange={handleChangeBirthday}/>
             </LocalizationProvider>
             <TextField
               label="预计寿命"
@@ -435,16 +311,7 @@ export default function Home() {
               onChange={(e) => {
                 setMaxYear(parseInt(e.target.value))
                 router.push(pathname + '?' + createQueryString('maxYear', e.target.value))
-              }} />
-            <FormControl fullWidth>
-              <InputLabel>最高学历</InputLabel>
-              <Select value={degree} onChange={(e) => setDegree(e.target.value as number)} label="最高学历">
-                <MenuItem value={1}>专科</MenuItem>
-                <MenuItem value={2}>本科</MenuItem>
-                <MenuItem value={3}>硕士</MenuItem>
-                <MenuItem value={4}>博士</MenuItem>
-              </Select>
-            </FormControl>
+              }}/>
             <FormControl>
               <FormLabel>显示粒度</FormLabel>
               <RadioGroup row value={unit} onChange={(e) => {
@@ -458,14 +325,36 @@ export default function Home() {
               </RadioGroup>
             </FormControl>
           </div>
-          <div className='flex items-center gap-2'>
+          <div className='flex items-center gap-8 flex-wrap'>
             {
-              rectangleTypes.map(it => (
-                <div className='flex gap-1 items-center'>
-                  <Rectangle backgroundColor={it.backgroundColor} key={it.label}/>
-                  <p>{it.label}</p>
-                </div>
-              ))
+              milestones.map((it, index) => {
+                return (
+                  <div
+                    className='flex gap-1 items-center'
+                    key={it.label}
+                    onMouseEnter={() => setHoveredIndex(index)}
+                    onMouseLeave={() => setHoveredIndex(null)}
+                  >
+                    <Rectangle className='cursor-pointer' backgroundColor={it.color} key={it.label} onClick={() => {
+                      if (it.startDate) {
+                        customMilestoneRef.current?.open({
+                          label: it.label,
+                          color: it.color,
+                          startDate: it.startDate,
+                          endDate: it.endDate
+                        })
+                      }
+                    }}/>
+                    <p>{it.label}</p>
+                    {
+                      it.startDate && (
+                        <FontAwesomeIcon className={`${hoveredIndex === index ? 'inline' : 'hidden'}`} icon={faClose}
+                                         onClick={() => removeMilestone(index)}/>
+                      )
+                    }
+                  </div>
+                )
+              })
             }
           </div>
           {
@@ -489,11 +378,12 @@ export default function Home() {
                     timelineItems.map((it) => (
                       <TimelineItem>
                         <TimelineOppositeContent color="text.secondary">
-                          {it.startDate}
+                          {it.startDate && format(it.startDate, 'yyyy-MM-dd')}
                         </TimelineOppositeContent>
                         <TimelineSeparator>
-                          <TimelineDot sx={{color: mapColor(it.backgroundColor), backgroundColor: mapColor(it.backgroundColor)}}/>
-                          <TimelineConnector />
+                          <TimelineDot
+                            sx={{color: twColorToHex(it.color), backgroundColor: twColorToHex(it.color)}}/>
+                          <TimelineConnector/>
                         </TimelineSeparator>
                         <TimelineContent>{it.label}</TimelineContent>
                       </TimelineItem>
@@ -508,37 +398,9 @@ export default function Home() {
           </div>
         </Stack>
       </main>
+      <CustomMilestoneDialog ref={customMilestoneRef} onAddMilestone={(milestone: Milestone) => {
+        addMilestone(milestone)
+      }}/>
     </ThemeProvider>
   )
-}
-
-function mapColor(twColor?: string) {
-  switch (twColor) {
-    case "bg-zinc-400":
-      return "#a1a1aa"
-    case "bg-rose-400":
-      return "#fb7185"
-    case "bg-yellow-400":
-      return "#facc15"
-    case "bg-slate-200":
-      return "#e2e8f0"
-    case "bg-orange-400":
-      return "#fb923c"
-    case "bg-green-200":
-      return "#bbf7d0"
-    case "bg-red-600":
-      return "#dc2626"
-    case "bg-pink-400":
-      return "#f472b6"
-    case "bg-cyan-400":
-      return "#22d3ee"
-    case "bg-lime-400":
-      return "#a3e635"
-    case "bg-sky-600":
-      return "#0284c7"
-    case "bg-purple-400":
-      return "#c084fc"
-    default:
-      return "#fff"
-  }
 }
