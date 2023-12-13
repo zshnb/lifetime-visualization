@@ -15,7 +15,8 @@ import {
   format,
   isAfter,
   isBefore, isEqual,
-  min, parseISO
+  min,
+  toDate
 } from "date-fns";
 import {
   createTheme,
@@ -42,20 +43,16 @@ import {
   TimelineOppositeContent,
   TimelineSeparator
 } from "@mui/lab";
-import {usePathname, useRouter, useSearchParams} from "next/navigation";
 import CustomMilestoneDialog, {CustomMilestoneDialogRef, Milestone} from "@/components/CustomMilestoneDialog";
 import useMilestones from "@/hooks/useMilestones";
 import {twColorToHex} from "@/utils/colorUtil";
-import useStorage from "@/hooks/useStorage";
+import useStorage, {StorageSchema} from "@/hooks/useStorage";
 
 export default function Home() {
   const [maxYear, setMaxYear] = useState(80)
   const [birthday, setBirthday] = useState<Date | undefined>(undefined)
   const [unit, setUnit] = useState(12)
   const [validDate, setValidDate] = useState(false)
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const pathname = usePathname()
 
   const {save, load} = useStorage()
 
@@ -76,7 +73,7 @@ export default function Home() {
     [prefersDarkMode],
   );
 
-  const handleChangeBirthday = useDebouncedCallback((value) => {
+  const handleChangeBirthday = useDebouncedCallback((value: Date | null) => {
     if (value) {
       setBirthday(value)
       try {
@@ -85,7 +82,7 @@ export default function Home() {
         confirmDefaultMilestone(value)
         save({
           user: {
-            birthday: value
+            birthday: value.getTime()
           }
         })
       } catch (e) {
@@ -193,9 +190,12 @@ export default function Home() {
         isEqual(item.startDate!, date) ||
         (isBefore(date, item.endDate || date) && isAfter(date, item.startDate || date))
       )
+      // console.log(`date: ${date}`)
+      // console.log('milestones', milestones)
       return <Rectangle
         key={it}
-        date={validDate ? format(date, 'yyyy-MM-dd') : undefined}
+        date={validDate ? date : undefined}
+        unit={unit}
         onClick={() => {
           customMilestoneRef.current?.open({
             startDate: date,
@@ -271,21 +271,11 @@ export default function Home() {
     }
   }, [validDate, milestones])
 
-  const createQueryString = useCallback(
-    (name: string, value: string) => {
-      const params = new URLSearchParams(searchParams)
-      params.set(name, value)
-
-      return params.toString()
-    },
-    [searchParams]
-  )
-
   useEffect(() => {
     const data = load()
     if (data?.user) {
       if (data.user.birthday) {
-        setBirthday(parseISO(data.user.birthday))
+        setBirthday(toDate(data.user.birthday))
         setValidDate(true)
       }
       data.user.maxYear && setMaxYear(data.user.maxYear)

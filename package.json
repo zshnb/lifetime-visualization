@@ -22,6 +22,7 @@
     "@uiw/react-color": "^2.0.3",
     "DateRangePicker": "link:@mui/x-date-pickers-pro/DateRangePicker",
     "date-fns": "^2.30.0",
+    "lodash": "^4.17.21",
     "next": "14.0.4",
     "qs": "^6.11.2",
     "react": "^18",
@@ -30,6 +31,7 @@
     "use-debounce": "^10.0.0"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.202",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
