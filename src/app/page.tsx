@@ -282,19 +282,6 @@ export default function Home() {
   )
 
   useEffect(() => {
-    const params = new URLSearchParams(searchParams)
-    const maxYear = params.get('maxYear')
-    if (maxYear) {
-      setMaxYear(parseInt(maxYear))
-    }
-    const unit = params.get('unit')
-    if (unit) {
-      setUnit(parseInt(unit))
-    }
-
-  }, []);
-
-  useEffect(() => {
     const data = load()
     if (data?.user) {
       if (data.user.birthday) {
@@ -331,7 +318,6 @@ export default function Home() {
               type='number'
               onChange={(e) => {
                 setMaxYear(parseInt(e.target.value))
-                router.push(pathname + '?' + createQueryString('maxYear', e.target.value))
                 save({
                   user: {
                     maxYear: parseInt(e.target.value)
@@ -342,7 +328,6 @@ export default function Home() {
               <FormLabel>显示粒度</FormLabel>
               <RadioGroup row value={unit} onChange={(e) => {
                 setUnit(parseInt(e.target.value))
-                router.push(pathname + '?' + createQueryString('unit', e.target.value))
                 save({
                   user: {
                     unit: parseInt(e.target.value)
