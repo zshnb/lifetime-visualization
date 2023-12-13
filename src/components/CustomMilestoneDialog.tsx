@@ -42,8 +42,15 @@ function CustomMilestoneDialogComponent(props: CustomMilestoneDialogProps, ref: 
     }
   }), []);
 
+  const resetForm = () => {
+    setLabel('')
+    setLabelError(false)
+    setLabelHelperText('')
+  }
+
   const handleClose = () => {
     setOpen(false)
+    resetForm()
   }
 
   const {isMilestoneExist}  = useMilestones()
@@ -70,6 +77,7 @@ function CustomMilestoneDialogComponent(props: CustomMilestoneDialogProps, ref: 
       endDate: dateRange[1]
     })
     setOpen(false)
+    resetForm()
   }
 
   return (
