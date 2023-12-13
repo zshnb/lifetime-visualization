@@ -1,12 +1,14 @@
-import {useCallback, useState} from "react";
+import {useCallback, useEffect, useState} from "react";
 import {Milestone} from "@/components/CustomMilestoneDialog";
-import {addYears, isAfter, isBefore, isEqual} from "date-fns";
+import {addYears, parseISO} from "date-fns";
+import useStorage from "@/hooks/useStorage";
+import {sortMilestones} from "@/utils/milestoneUtil";
 
 const defaultMilestoneDurationYears = [3, 3, 6, 3, 3, 4]
 export default function useMilestones() {
   const [milestones, setMilestones] = useState<Milestone[]>([
     {
-      label: '出生',
+      label: '童年',
       color: 'bg-zinc-400',
     },
     {
@@ -39,26 +41,22 @@ export default function useMilestones() {
     },
   ])
 
+  const {save, load} = useStorage()
+
   const addMilestone = useCallback((milestone: Milestone) => {
     milestones.splice(milestones.length - 2, 0, milestone)
-    milestones.sort((a: Milestone, b: Milestone) => {
-      if (isBefore(a.startDate!, b.startDate!)) {
-        return -1
-      }
-      if (isAfter(a.startDate!, b.startDate!)) {
-        return 1
-      }
-      if (isEqual(a.startDate!, b.startDate!)) {
-        return isBefore(a.endDate!, b.endDate!) ? -1 : 1
-      }
-      return 0
+    setMilestones([...sortMilestones(milestones)])
+    save({
+      milestones
     })
-    setMilestones([...milestones])
   }, [milestones])
 
   const removeMilestone = useCallback((index: number) => {
     milestones.splice(index, 1)
     setMilestones([...milestones])
+    save({
+      milestones
+    })
   }, [milestones])
 
   const confirmDefaultMilestone = useCallback((birthday: Date) => {
@@ -75,11 +73,29 @@ export default function useMilestones() {
       return object
     }))
     setMilestones(newMilestones)
+    save({
+      milestones: newMilestones
+    })
   }, [])
 
   const isMilestoneExist = (label: string) => {
     return milestones.find(it => it.label === label) !== undefined
   }
+
+  useEffect(() => {
+    const data = load()
+    if (data?.milestones) {
+      const newMilestones = data.milestones
+        .map(it => {
+          return {
+            ...it,
+            startDate: it.startDate ? parseISO(it.startDate + '') : undefined,
+            endDate: it.endDate ? parseISO(it.endDate + '') : undefined
+          }
+        })
+      setMilestones(sortMilestones(newMilestones))
+    }
+  }, []);
   return {
     milestones,
     addMilestone,

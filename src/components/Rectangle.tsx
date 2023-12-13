@@ -65,7 +65,7 @@ export default function Rectangle(props: RectangleProps) {
             <div className='flex flex-col gap-x-2'>
               {
                 props.milestones.map(it => (
-                  <div className='flex gap-1 items-center'>
+                  <div key={it.label} className='flex gap-1 items-center'>
                     <Rectangle backgroundColor={it.color}/>
                     <p>{it.label}</p>
                     <p>今天是{props.date}</p>

@@ -15,7 +15,7 @@ import {
   format,
   isAfter,
   isBefore, isEqual,
-  min
+  min, parseISO
 } from "date-fns";
 import {
   createTheme,
@@ -46,6 +46,7 @@ import {usePathname, useRouter, useSearchParams} from "next/navigation";
 import CustomMilestoneDialog, {CustomMilestoneDialogRef, Milestone} from "@/components/CustomMilestoneDialog";
 import useMilestones from "@/hooks/useMilestones";
 import {twColorToHex} from "@/utils/colorUtil";
+import useStorage from "@/hooks/useStorage";
 
 export default function Home() {
   const [maxYear, setMaxYear] = useState(80)
@@ -55,6 +56,8 @@ export default function Home() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const pathname = usePathname()
+
+  const {save, load} = useStorage()
 
   const array = useMemo(() => {
     return Array.from({length: unit * maxYear}, (v, k) => k)
@@ -80,6 +83,11 @@ export default function Home() {
         format(value, 'yyyy-MM-dd')
         setValidDate(true)
         confirmDefaultMilestone(value)
+        save({
+          user: {
+            birthday: value
+          }
+        })
       } catch (e) {
         setValidDate(false)
       }
@@ -250,13 +258,14 @@ export default function Home() {
 
   const timelineItems = useMemo(() => {
     if (validDate) {
-      return milestones.map(it => {
-        return {
-          startDate: it.startDate,
-          label: it.label,
-          color: it.color
-        }
-      })
+      return milestones.filter(it => it.startDate !== undefined)
+        .map(it => {
+          return {
+            startDate: it.startDate,
+            label: it.label,
+            color: it.color
+          }
+        })
     } else {
       return []
     }
@@ -273,17 +282,16 @@ export default function Home() {
   )
 
   useEffect(() => {
-    const params = new URLSearchParams(searchParams)
-    const maxYear = params.get('maxYear')
-    if (maxYear) {
-      setMaxYear(parseInt(maxYear))
+    const data = load()
+    if (data?.user) {
+      if (data.user.birthday) {
+        setBirthday(parseISO(data.user.birthday))
+        setValidDate(true)
+      }
+      data.user.maxYear && setMaxYear(data.user.maxYear)
+      data.user.unit && setUnit(data.user.unit)
     }
-    const unit = params.get('unit')
-    if (unit) {
-      setUnit(parseInt(unit))
-    }
-
-  }, []);
+  }, [])
 
   const customMilestoneRef = useRef<CustomMilestoneDialogRef>(null)
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
@@ -310,13 +318,21 @@ export default function Home() {
               type='number'
               onChange={(e) => {
                 setMaxYear(parseInt(e.target.value))
-                router.push(pathname + '?' + createQueryString('maxYear', e.target.value))
+                save({
+                  user: {
+                    maxYear: parseInt(e.target.value)
+                  }
+                })
               }}/>
             <FormControl>
               <FormLabel>显示粒度</FormLabel>
               <RadioGroup row value={unit} onChange={(e) => {
                 setUnit(parseInt(e.target.value))
-                router.push(pathname + '?' + createQueryString('unit', e.target.value))
+                save({
+                  user: {
+                    unit: parseInt(e.target.value)
+                  }
+                })
               }}>
                 <FormControlLabel value={365} control={<Radio/>} label="日"/>
                 <FormControlLabel value={52} control={<Radio/>} label="周"/>
