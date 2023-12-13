@@ -189,7 +189,10 @@ export default function Home() {
         key={it}
         date={validDate ? format(date, 'yyyy-MM-dd') : undefined}
         onClick={() => {
-          customMilestoneRef.current?.open({})
+          customMilestoneRef.current?.open({
+            startDate: date,
+            endDate: date
+          })
         }}
         backgroundColor={backgroundColor}
         milestones={validMilestones}

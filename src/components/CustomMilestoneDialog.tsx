@@ -10,6 +10,7 @@ import {FormEvent, forwardRef, Ref, useImperativeHandle, useState} from "react";
 import {Sketch} from "@uiw/react-color";
 import DateRangePicker from "@/components/DateRangePicker";
 import {twColorToHex} from "@/utils/colorUtil";
+import useMilestones from "@/hooks/useMilestones";
 
 export type CustomMilestoneDialogProps = {
   onAddMilestone: (item: Milestone) => void
@@ -27,7 +28,8 @@ function CustomMilestoneDialogComponent(props: CustomMilestoneDialogProps, ref: 
   const [open, setOpen] = useState(false)
   const [label, setLabel] = useState('')
   const [color, setColor] = useState('#000')
-  const [nameError, setNameError] = useState(false)
+  const [labelError, setLabelError] = useState(false)
+  const [labelHelperText, setLabelHelperText] = useState('')
   const [dateRange, setDateRange] = useState<Date[]>([])
 
   useImperativeHandle(ref, () => ({
@@ -44,13 +46,20 @@ function CustomMilestoneDialogComponent(props: CustomMilestoneDialogProps, ref: 
     setOpen(false)
   }
 
+  const {isMilestoneExist}  = useMilestones()
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
     if (!label) {
-      setNameError(true)
+      setLabelError(true)
+      setLabelHelperText('请输入里程碑名称')
       return
     }
     if (dateRange.length !== 2) {
+      return
+    }
+    if (isMilestoneExist(label)) {
+      setLabelError(true)
+      setLabelHelperText('里程碑已存在')
       return
     }
 
@@ -76,7 +85,8 @@ function CustomMilestoneDialogComponent(props: CustomMilestoneDialogProps, ref: 
               variant="outlined"
               required
               value={label}
-              error={nameError}
+              error={labelError}
+              helperText={labelHelperText}
               className='w-full'
               onChange={(e) => {
                 setLabel(e.target.value)

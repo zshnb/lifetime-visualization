@@ -76,10 +76,15 @@ export default function useMilestones() {
     }))
     setMilestones(newMilestones)
   }, [])
+
+  const isMilestoneExist = (label: string) => {
+    return milestones.find(it => it.label === label) !== undefined
+  }
   return {
     milestones,
     addMilestone,
     removeMilestone,
-    confirmDefaultMilestone
+    confirmDefaultMilestone,
+    isMilestoneExist
   }
 }
