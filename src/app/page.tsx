@@ -11,11 +11,12 @@ import {
   differenceInDays,
   differenceInMonths,
   differenceInWeeks,
-  differenceInYears,
+  differenceInYears, endOfWeek,
   format,
   isAfter,
-  isBefore, isEqual,
-  min, parseISO
+  isBefore, isEqual, isSameWeek,
+  min, startOfWeek,
+  toDate
 } from "date-fns";
 import {
   createTheme,
@@ -42,20 +43,16 @@ import {
   TimelineOppositeContent,
   TimelineSeparator
 } from "@mui/lab";
-import {usePathname, useRouter, useSearchParams} from "next/navigation";
 import CustomMilestoneDialog, {CustomMilestoneDialogRef, Milestone} from "@/components/CustomMilestoneDialog";
 import useMilestones from "@/hooks/useMilestones";
 import {twColorToHex} from "@/utils/colorUtil";
-import useStorage from "@/hooks/useStorage";
+import useStorage, {StorageSchema} from "@/hooks/useStorage";
 
 export default function Home() {
   const [maxYear, setMaxYear] = useState(80)
   const [birthday, setBirthday] = useState<Date | undefined>(undefined)
   const [unit, setUnit] = useState(12)
   const [validDate, setValidDate] = useState(false)
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const pathname = usePathname()
 
   const {save, load} = useStorage()
 
@@ -64,7 +61,7 @@ export default function Home() {
   }, [unit, maxYear])
 
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
-  const {milestones, addMilestone, removeMilestone, confirmDefaultMilestone} = useMilestones()
+  const {milestones, addMilestone, removeMilestone, confirmDefaultMilestone, getCoveredMilestone} = useMilestones()
 
   const theme = useMemo(
     () =>
@@ -76,7 +73,7 @@ export default function Home() {
     [prefersDarkMode],
   );
 
-  const handleChangeBirthday = useDebouncedCallback((value) => {
+  const handleChangeBirthday = useDebouncedCallback((value: Date | null) => {
     if (value) {
       setBirthday(value)
       try {
@@ -85,7 +82,7 @@ export default function Home() {
         confirmDefaultMilestone(value)
         save({
           user: {
-            birthday: value
+            birthday: value.getTime()
           }
         })
       } catch (e) {
@@ -120,7 +117,7 @@ export default function Home() {
     return days;
   }, [unit, validDate, birthday, maxYear])
 
-  const getBackgroundColor = useCallback((day: number) => {
+  const getBackgroundColors = useCallback((day: number) => {
     // 今天
     if (day === liveDays) {
       return twColorToHex('bg-sky-600')
@@ -150,10 +147,7 @@ export default function Home() {
           break
         }
       }
-      const colors = milestones.filter(it => {
-        return isEqual(it.startDate!, date) ||
-          (isBefore(date, it.endDate!) && isAfter(date, it.startDate!));
-      })
+      const colors = getCoveredMilestone(date, unit)
         .map(it => twColorToHex(it.color))
       if (colors.length) {
         return colors
@@ -161,12 +155,11 @@ export default function Home() {
     }
 
     return twColorToHex('bg-green-200')
-  }, [liveDays, milestones, birthday, unit])
+  }, [liveDays, birthday, unit, getCoveredMilestone])
 
 
   const rectangles = useMemo(() => {
     return array.map((it) => {
-      const backgroundColor = getBackgroundColor(it)
       let date: Date = new Date()
       if (validDate && birthday) {
         switch (unit) {
@@ -188,14 +181,13 @@ export default function Home() {
           }
         }
       }
+      const backgroundColor = getBackgroundColors(it)
 
-      const validMilestones = milestones.filter(item =>
-        isEqual(item.startDate!, date) ||
-        (isBefore(date, item.endDate || date) && isAfter(date, item.startDate || date))
-      )
+      const validMilestones = getCoveredMilestone(date, unit)
       return <Rectangle
         key={it}
-        date={validDate ? format(date, 'yyyy-MM-dd') : undefined}
+        date={validDate ? date : undefined}
+        unit={unit}
         onClick={() => {
           customMilestoneRef.current?.open({
             startDate: date,
@@ -206,7 +198,7 @@ export default function Home() {
         milestones={validMilestones}
       />
     })
-  }, [getBackgroundColor, array, unit, validDate, birthday, milestones])
+  }, [getBackgroundColors, array, unit, validDate, birthday, getCoveredMilestone])
 
   const aliveDisplay = useMemo(() => {
     if (validDate && birthday) {
@@ -258,7 +250,7 @@ export default function Home() {
 
   const timelineItems = useMemo(() => {
     if (validDate) {
-      return milestones.filter(it => it.startDate !== undefined)
+      return milestones.filter(it => it.startDate !== undefined && isBefore(it.startDate, new Date()))
         .map(it => {
           return {
             startDate: it.startDate,
@@ -271,21 +263,11 @@ export default function Home() {
     }
   }, [validDate, milestones])
 
-  const createQueryString = useCallback(
-    (name: string, value: string) => {
-      const params = new URLSearchParams(searchParams)
-      params.set(name, value)
-
-      return params.toString()
-    },
-    [searchParams]
-  )
-
   useEffect(() => {
     const data = load()
     if (data?.user) {
       if (data.user.birthday) {
-        setBirthday(parseISO(data.user.birthday))
+        setBirthday(toDate(data.user.birthday))
         setValidDate(true)
       }
       data.user.maxYear && setMaxYear(data.user.maxYear)
@@ -317,10 +299,11 @@ export default function Home() {
               value={maxYear}
               type='number'
               onChange={(e) => {
-                setMaxYear(parseInt(e.target.value))
+                const maxYear = Math.min(parseInt(e.target.value), 120)
+                setMaxYear(maxYear)
                 save({
                   user: {
-                    maxYear: parseInt(e.target.value)
+                    maxYear
                   }
                 })
               }}/>

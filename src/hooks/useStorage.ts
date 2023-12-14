@@ -1,8 +1,9 @@
 import {Milestone} from "@/components/CustomMilestoneDialog";
+import {merge} from 'lodash'
 
 export type StorageSchema = {
   user?: {
-    birthday?: string
+    birthday?: number
     maxYear?: number
     unit?: number
   },
@@ -13,14 +14,14 @@ export default function useStorage() {
   const save = (schema: StorageSchema) => {
     const existData = load()
     if (existData) {
-      const merged = Object.assign(existData, schema)
+      const merged = merge(existData, schema)
       window.localStorage.setItem(key, JSON.stringify(merged))
     } else {
       window.localStorage.setItem(key, JSON.stringify(schema))
     }
   }
 
-  const load = (): StorageSchema | undefined => {
+  const load = () => {
     const data = window.localStorage.getItem(key)
     if (data) {
       return JSON.parse(data) as StorageSchema

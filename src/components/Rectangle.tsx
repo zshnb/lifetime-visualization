@@ -1,10 +1,12 @@
 import {useMemo, useState} from "react";
 import {buildLinearGradient, twColorToHex} from "@/utils/colorUtil";
 import {Milestone} from "@/components/CustomMilestoneDialog";
+import {format} from "date-fns";
 
 export interface RectangleProps {
   backgroundColor?: string[] | string
-  date?: string
+  date?: Date
+  unit?: number
   milestones?: Milestone[]
   onClick?: () => void
   className?: string
@@ -59,18 +61,35 @@ export default function Rectangle(props: RectangleProps) {
       style={style}
     >
       {
-        props.milestones && (
+        (props.milestones?.length || 0) > 0 && (
           <div
             className={`absolute border border-gray-300 -top-16 flex-col ${hover ? 'flex' : 'hidden'} w-[300px] p-4 rounded z-10 bg-white`}>
             <div className='flex flex-col gap-x-2'>
               {
-                props.milestones.map(it => (
-                  <div key={it.label} className='flex gap-1 items-center'>
-                    <Rectangle backgroundColor={it.color}/>
-                    <p>{it.label}</p>
-                    <p>今天是{props.date}</p>
-                  </div>
-                ))
+                props.milestones!.map(it => {
+                  let formatPattern = 'yyyy年MM月dd号'
+                  switch (props.unit) {
+                    case 1: {
+                      formatPattern = 'yyyy年'
+                      break
+                    }
+                    case 12: {
+                      formatPattern = 'yyyy年MM月'
+                      break
+                    }
+                    case 52: {
+                      formatPattern = 'yyyy年MM月ww周'
+                      break
+                    }
+                  }
+                  return (
+                    <div key={it.label} className='flex gap-2 items-center'>
+                      <Rectangle backgroundColor={it.color}/>
+                      <p>{it.label}</p>
+                      <p>{format(props.date!, formatPattern)}</p>
+                    </div>
+                  )
+                })
               }
             </div>
           </div>
