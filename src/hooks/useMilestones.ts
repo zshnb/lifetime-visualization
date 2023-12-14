@@ -10,42 +10,50 @@ export default function useMilestones() {
     {
       label: '童年',
       color: 'bg-zinc-400',
-      order: 0
+      order: 0,
+      default: true
     },
     {
       label: '幼儿园',
       color: 'bg-red-600',
-      order: 1
+      order: 1,
+      default: true
     },
     {
       label: '小学',
       color: 'bg-orange-400',
-      order: 2
+      order: 2,
+      default: true
     },
     {
       label: '初中',
       color: 'bg-yellow-400',
-      order: 3
+      order: 3,
+      default: true
     },
     {
       label: '高中',
       color: 'bg-rose-400',
-      order: 4
+      order: 4,
+      default: true
     },
     {
       label: '大学本科',
       color: 'bg-cyan-400',
-      order: 5
+      order: 5,
+      default: true
     },
     {
       label: '日常',
       color: 'bg-green-200',
-      order: 6
+      order: 6,
+      default: true
     },
     {
       label: '今天',
       color: 'bg-sky-600',
-      order: 7
+      order: 7,
+      default: true
     },
   ])
 
@@ -67,24 +75,39 @@ export default function useMilestones() {
     })
   }, [milestones])
 
-  const confirmDefaultMilestone = useCallback((birthday: Date) => {
+  /*
+  * when change birthday, calculate milestone's start/end date
+  * */
+  const confirmMilestoneDate = (birthday: Date) => {
+    const data = load()
     let pastYears = 0
-    const newMilestones: Milestone[] = milestones.map(((it, index) => {
-      const object = {
-        ...it,
-        startDate: index < defaultMilestoneDurationYears.length ? addYears(birthday, pastYears) : undefined,
-        endDate: index < defaultMilestoneDurationYears.length ?
-          addYears(birthday, defaultMilestoneDurationYears[index] + pastYears) :
-          undefined
-      }
-      pastYears += defaultMilestoneDurationYears[index]
-      return object
-    }))
-    setMilestones(newMilestones)
+    const month = birthday.getMonth()
+    const extraSchoolGapYear = month < 8 ? 0 : 1 // 9.1 is school's enter date, if born after this date, need enter school next year
+    const newMilestones: Milestone[] = (data?.milestones || milestones)
+      .filter(it => it.default)
+      .map(((it, index) => {
+        let startDate
+        if (index === 0) {
+          startDate = birthday
+        } else {
+          startDate = index < defaultMilestoneDurationYears.length ?
+            new Date(birthday.getFullYear() + pastYears + extraSchoolGapYear, 8, 1) : undefined
+        }
+        const object = {
+          ...it,
+          startDate,
+          endDate: index < defaultMilestoneDurationYears.length ?
+            new Date(birthday.getFullYear() + defaultMilestoneDurationYears[index] + pastYears + extraSchoolGapYear, 6, 1) :
+            undefined
+        }
+        pastYears += defaultMilestoneDurationYears[index]
+        return object
+      }))
+    setMilestones([...sortMilestones(newMilestones)])
     save({
       milestones: newMilestones
     })
-  }, [])
+  }
 
   const isMilestoneExist = (label: string) => {
     return milestones.find(it => it.label === label) !== undefined
@@ -94,7 +117,7 @@ export default function useMilestones() {
     const data = load()
     if (data?.milestones) {
       const newMilestones = data.milestones
-        .map(it => {
+        .map((it: Milestone) => {
           return {
             ...it,
             startDate: it.startDate ? parseISO(it.startDate + '') : undefined,
@@ -136,7 +159,7 @@ export default function useMilestones() {
     milestones,
     addMilestone,
     removeMilestone,
-    confirmDefaultMilestone,
+    confirmMilestoneDate,
     isMilestoneExist,
     getCoveredMilestone
   }

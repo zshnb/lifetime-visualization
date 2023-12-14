@@ -11,12 +11,8 @@ import {
   differenceInDays,
   differenceInMonths,
   differenceInWeeks,
-  differenceInYears, endOfWeek,
-  format,
-  isAfter,
-  isBefore, isEqual, isSameWeek,
-  min, startOfWeek,
-  toDate
+  differenceInYears, format,
+  isBefore, min, toDate
 } from "date-fns";
 import {
   createTheme,
@@ -46,7 +42,7 @@ import {
 import CustomMilestoneDialog, {CustomMilestoneDialogRef, Milestone} from "@/components/CustomMilestoneDialog";
 import useMilestones from "@/hooks/useMilestones";
 import {twColorToHex} from "@/utils/colorUtil";
-import useStorage, {StorageSchema} from "@/hooks/useStorage";
+import useStorage from "@/hooks/useStorage";
 
 export default function Home() {
   const [maxYear, setMaxYear] = useState(80)
@@ -61,7 +57,7 @@ export default function Home() {
   }, [unit, maxYear])
 
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
-  const {milestones, addMilestone, removeMilestone, confirmDefaultMilestone, getCoveredMilestone} = useMilestones()
+  const {milestones, addMilestone, removeMilestone, confirmMilestoneDate, getCoveredMilestone} = useMilestones()
 
   const theme = useMemo(
     () =>
@@ -79,7 +75,7 @@ export default function Home() {
       try {
         format(value, 'yyyy-MM-dd')
         setValidDate(true)
-        confirmDefaultMilestone(value)
+        confirmMilestoneDate(value)
         save({
           user: {
             birthday: value.getTime()

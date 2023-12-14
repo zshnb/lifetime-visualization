@@ -21,6 +21,7 @@ export type Milestone = {
   endDate?: Date
   color: string
   order?: number
+  default: boolean
 }
 export type CustomMilestoneDialogRef = {
   open: (milestone: Partial<Milestone>) => void
@@ -75,7 +76,8 @@ function CustomMilestoneDialogComponent(props: CustomMilestoneDialogProps, ref: 
       label,
       color: color,
       startDate: dateRange[0],
-      endDate: dateRange[1]
+      endDate: dateRange[1],
+      default: false
     })
     setOpen(false)
     resetForm()
