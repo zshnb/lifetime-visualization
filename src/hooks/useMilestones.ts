@@ -81,11 +81,11 @@ export default function useMilestones() {
   const confirmMilestoneDate = (birthday: Date) => {
     const data = load()
     let pastYears = 0
+    const month = birthday.getMonth()
+    const extraSchoolGapYear = month < 8 ? 0 : 1 // 9.1 is school's enter date, if born after this date, need enter school next year
     const newMilestones: Milestone[] = (data?.milestones || milestones)
       .filter(it => it.default)
       .map(((it, index) => {
-        const month = birthday.getMonth()
-        const extraSchoolGapYear = month < 8 ? 0 : 1
         let startDate
         if (index === 0) {
           startDate = birthday
