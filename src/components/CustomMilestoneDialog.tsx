@@ -20,6 +20,7 @@ export type Milestone = {
   startDate?: Date
   endDate?: Date
   color: string
+  order?: number
 }
 export type CustomMilestoneDialogRef = {
   open: (milestone: Partial<Milestone>) => void

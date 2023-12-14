@@ -1,6 +1,6 @@
 import {useCallback, useEffect, useState} from "react";
 import {Milestone} from "@/components/CustomMilestoneDialog";
-import {addYears, parseISO} from "date-fns";
+import {addYears, endOfWeek, parseISO, startOfWeek} from "date-fns";
 import useStorage from "@/hooks/useStorage";
 import {sortMilestones} from "@/utils/milestoneUtil";
 
@@ -10,34 +10,42 @@ export default function useMilestones() {
     {
       label: '童年',
       color: 'bg-zinc-400',
+      order: 0
     },
     {
       label: '幼儿园',
       color: 'bg-red-600',
+      order: 1
     },
     {
       label: '小学',
       color: 'bg-orange-400',
+      order: 2
     },
     {
       label: '初中',
       color: 'bg-yellow-400',
+      order: 3
     },
     {
       label: '高中',
       color: 'bg-rose-400',
+      order: 4
     },
     {
       label: '大学本科',
       color: 'bg-cyan-400',
+      order: 5
     },
     {
       label: '日常',
       color: 'bg-green-200',
+      order: 6
     },
     {
       label: '今天',
       color: 'bg-sky-600',
+      order: 7
     },
   ])
 
@@ -96,11 +104,40 @@ export default function useMilestones() {
       setMilestones(sortMilestones(newMilestones))
     }
   }, []);
+
+  const getCoveredMilestone = (date: Date, unit: number) => {
+    return milestones
+      .filter(it => it.startDate !== undefined && it.endDate !== undefined)
+      .filter(it => {
+        switch (unit) {
+          case 1: {
+            const startYear = it.startDate!.getFullYear()
+            const endYear = it.endDate!.getFullYear()
+            return date.getFullYear() >= startYear && date.getFullYear() <= endYear
+          }
+          case 12: {
+            const startDate = new Date(it.startDate!.getFullYear(), it.startDate!.getMonth())
+            const endDate = new Date(it.endDate!.getFullYear(), it.endDate!.getMonth())
+            return date.getTime() >= startDate.getTime() && date.getTime() <= endDate.getTime()
+          }
+          case 52: {
+            const startDate = endOfWeek(it.startDate!)
+            const endDate = startOfWeek(it.endDate!)
+            return date.getTime() >= startDate.getTime() && date.getTime() <= endDate.getTime()
+          }
+          case 365: {
+            return date.getTime() >= it.startDate!.getTime() && date.getTime() <= it.endDate!.getTime()
+          }
+        }
+      })
+  }
+
   return {
     milestones,
     addMilestone,
     removeMilestone,
     confirmDefaultMilestone,
-    isMilestoneExist
+    isMilestoneExist,
+    getCoveredMilestone
   }
 }

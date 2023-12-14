@@ -11,11 +11,11 @@ import {
   differenceInDays,
   differenceInMonths,
   differenceInWeeks,
-  differenceInYears,
+  differenceInYears, endOfWeek,
   format,
   isAfter,
-  isBefore, isEqual,
-  min,
+  isBefore, isEqual, isSameWeek,
+  min, startOfWeek,
   toDate
 } from "date-fns";
 import {
@@ -61,7 +61,7 @@ export default function Home() {
   }, [unit, maxYear])
 
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
-  const {milestones, addMilestone, removeMilestone, confirmDefaultMilestone} = useMilestones()
+  const {milestones, addMilestone, removeMilestone, confirmDefaultMilestone, getCoveredMilestone} = useMilestones()
 
   const theme = useMemo(
     () =>
@@ -117,7 +117,7 @@ export default function Home() {
     return days;
   }, [unit, validDate, birthday, maxYear])
 
-  const getBackgroundColor = useCallback((day: number) => {
+  const getBackgroundColors = useCallback((day: number) => {
     // 今天
     if (day === liveDays) {
       return twColorToHex('bg-sky-600')
@@ -147,10 +147,7 @@ export default function Home() {
           break
         }
       }
-      const colors = milestones.filter(it => {
-        return isEqual(it.startDate!, date) ||
-          (isBefore(date, it.endDate!) && isAfter(date, it.startDate!));
-      })
+      const colors = getCoveredMilestone(date, unit)
         .map(it => twColorToHex(it.color))
       if (colors.length) {
         return colors
@@ -158,12 +155,11 @@ export default function Home() {
     }
 
     return twColorToHex('bg-green-200')
-  }, [liveDays, milestones, birthday, unit])
+  }, [liveDays, birthday, unit, getCoveredMilestone])
 
 
   const rectangles = useMemo(() => {
     return array.map((it) => {
-      const backgroundColor = getBackgroundColor(it)
       let date: Date = new Date()
       if (validDate && birthday) {
         switch (unit) {
@@ -185,15 +181,9 @@ export default function Home() {
           }
         }
       }
+      const backgroundColor = getBackgroundColors(it)
 
-      const validMilestones = milestones.filter(item =>
-        isEqual(item.startDate!, date) ||
-        (
-          isBefore(date, item.endDate || date) &&
-          isAfter(date, item.startDate || date) &&
-          isBefore(item.startDate!, new Date())
-        )
-      )
+      const validMilestones = getCoveredMilestone(date, unit)
       return <Rectangle
         key={it}
         date={validDate ? date : undefined}
@@ -208,7 +198,7 @@ export default function Home() {
         milestones={validMilestones}
       />
     })
-  }, [getBackgroundColor, array, unit, validDate, birthday, milestones])
+  }, [getBackgroundColors, array, unit, validDate, birthday, getCoveredMilestone])
 
   const aliveDisplay = useMemo(() => {
     if (validDate && birthday) {
@@ -309,10 +299,11 @@ export default function Home() {
               value={maxYear}
               type='number'
               onChange={(e) => {
-                setMaxYear(parseInt(e.target.value))
+                const maxYear = Math.min(parseInt(e.target.value), 120)
+                setMaxYear(maxYear)
                 save({
                   user: {
-                    maxYear: parseInt(e.target.value)
+                    maxYear
                   }
                 })
               }}/>
