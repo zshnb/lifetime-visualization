@@ -23,6 +23,7 @@ export type Milestone = {
   color: string
   order?: number
   default: boolean
+  site?: string
 }
 export type CustomMilestoneDialogRef = {
   open: (milestone: Partial<Milestone>) => void
@@ -30,6 +31,7 @@ export type CustomMilestoneDialogRef = {
 function CustomMilestoneDialogComponent(props: CustomMilestoneDialogProps, ref: Ref<CustomMilestoneDialogRef>) {
   const [open, setOpen] = useState(false)
   const [label, setLabel] = useState('')
+  const [site, setSite] = useState<string | undefined>(undefined)
   const [color, setColor] = useState('#000')
   const [labelError, setLabelError] = useState(false)
   const [labelHelperText, setLabelHelperText] = useState('')
@@ -50,6 +52,7 @@ function CustomMilestoneDialogComponent(props: CustomMilestoneDialogProps, ref: 
       }
       milestone.color && setColor(twColorToHex(milestone.color))
       setDateRange([milestone.startDate!, milestone.endDate!])
+      setSite(milestone.site)
     }
   }), []);
 
@@ -87,7 +90,8 @@ function CustomMilestoneDialogComponent(props: CustomMilestoneDialogProps, ref: 
         color: color,
         startDate: dateRange[0],
         endDate: dateRange[1],
-        default: false
+        default: false,
+        site
       })
     } else {
       props.onUpdateMilestone(oldLabelRef.current, {
@@ -95,7 +99,8 @@ function CustomMilestoneDialogComponent(props: CustomMilestoneDialogProps, ref: 
         color: color,
         startDate: dateRange[0],
         endDate: dateRange[1],
-        default: isDefault
+        default: isDefault,
+        site
       })
     }
     setOpen(false)
@@ -114,12 +119,24 @@ function CustomMilestoneDialogComponent(props: CustomMilestoneDialogProps, ref: 
               label="名称"
               variant="outlined"
               required
+              placeholder='请输入里程碑名称'
               value={label}
               error={labelError}
               helperText={labelHelperText}
               className='w-full'
               onChange={(e) => {
                 setLabel(e.target.value)
+              }}/>
+          </div>
+          <div>
+            <TextField
+              label="地点"
+              variant="outlined"
+              value={site}
+              placeholder='请输入发生地点（可选）'
+              className='w-full'
+              onChange={(e) => {
+                setSite(e.target.value)
               }}/>
           </div>
           <DateRangePicker dateRange={dateRange} onAccept={(range: Date[]) => setDateRange(range)}/>
