@@ -43,6 +43,7 @@ import CustomMilestoneDialog, {CustomMilestoneDialogRef, Milestone} from "@/comp
 import useMilestones from "@/hooks/useMilestones";
 import {twColorToHex} from "@/utils/colorUtil";
 import useStorage from "@/hooks/useStorage";
+import ImageUploader from "@/components/ImageUploader";
 
 type TimelineItemType = Pick<Milestone, 'label' | 'color' | 'startDate' | 'site'>
 export default function Home() {
@@ -360,6 +361,7 @@ export default function Home() {
               </div>
             )
           }
+          <ImageUploader/>
         </div>
         <Stack direction='row' gap={2}>
           {
