@@ -28,7 +28,7 @@ import {
 } from "@mui/material";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faGithub} from '@fortawesome/free-brands-svg-icons'
-import {faClose} from '@fortawesome/free-solid-svg-icons'
+import {faClose, faTag, faLocationDot, faCalendar} from '@fortawesome/free-solid-svg-icons'
 import {useDebouncedCallback} from "use-debounce";
 import {
   Timeline,
@@ -44,6 +44,7 @@ import useMilestones from "@/hooks/useMilestones";
 import {twColorToHex} from "@/utils/colorUtil";
 import useStorage from "@/hooks/useStorage";
 
+type TimelineItem = Pick<Milestone, 'label' | 'color' | 'startDate' | 'site'>
 export default function Home() {
   const [maxYear, setMaxYear] = useState(80)
   const [birthday, setBirthday] = useState<Date | undefined>(undefined)
@@ -244,14 +245,15 @@ export default function Home() {
     }
   }, [unit, validDate, birthday, maxYear])
 
-  const timelineItems = useMemo(() => {
+  const timelineItems: TimelineItem[] = useMemo(() => {
     if (validDate) {
       return milestones.filter(it => it.startDate !== undefined && isBefore(it.startDate, new Date()))
         .map(it => {
           return {
             startDate: it.startDate,
             label: it.label,
-            color: it.color
+            color: it.color,
+            site: it.site
           }
         })
     } else {
@@ -369,13 +371,27 @@ export default function Home() {
                       <TimelineItem>
                         <TimelineOppositeContent color="text.secondary">
                           {it.startDate && format(it.startDate, 'yyyy-MM-dd')}
+                          <FontAwesomeIcon icon={faCalendar} style={{marginLeft: '0.5rem'}}/>
                         </TimelineOppositeContent>
                         <TimelineSeparator>
                           <TimelineDot
                             sx={{color: twColorToHex(it.color), backgroundColor: twColorToHex(it.color)}}/>
                           <TimelineConnector/>
                         </TimelineSeparator>
-                        <TimelineContent>{it.label}</TimelineContent>
+                        <TimelineContent>
+                          <div className='flex gap-2 items-center'>
+                            <FontAwesomeIcon icon={faTag} style={{color: '#666666'}}/>
+                            <p>{it.label}</p>
+                          </div>
+                          {
+                            it.site && (
+                              <div className='flex gap-2 items-center'>
+                                <FontAwesomeIcon icon={faLocationDot} style={{color: '#666666'}}/>
+                                <p>{it.site}</p>
+                              </div>
+                            )
+                          }
+                        </TimelineContent>
                       </TimelineItem>
                     ))
                   }
