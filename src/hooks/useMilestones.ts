@@ -1,6 +1,6 @@
 import {useCallback, useEffect, useState} from "react";
 import {Milestone} from "@/components/CustomMilestoneDialog";
-import {addYears, endOfWeek, parseISO, startOfWeek} from "date-fns";
+import {addYears, endOfMonth, endOfWeek, parseISO, startOfWeek} from "date-fns";
 import useStorage from "@/hooks/useStorage";
 import {sortMilestones} from "@/utils/milestoneUtil";
 
@@ -140,12 +140,12 @@ export default function useMilestones() {
           }
           case 12: {
             const startDate = new Date(it.startDate!.getFullYear(), it.startDate!.getMonth())
-            const endDate = new Date(it.endDate!.getFullYear(), it.endDate!.getMonth())
+            const endDate = endOfMonth(it.endDate!)
             return date.getTime() >= startDate.getTime() && date.getTime() <= endDate.getTime()
           }
           case 52: {
-            const startDate = endOfWeek(it.startDate!)
-            const endDate = startOfWeek(it.endDate!)
+            const startDate = startOfWeek(it.startDate!)
+            const endDate = endOfWeek(it.endDate!)
             return date.getTime() >= startDate.getTime() && date.getTime() <= endDate.getTime()
           }
           case 365: {
