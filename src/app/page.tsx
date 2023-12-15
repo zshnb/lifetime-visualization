@@ -57,7 +57,7 @@ export default function Home() {
   }, [unit, maxYear])
 
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
-  const {milestones, addMilestone, removeMilestone, confirmMilestoneDate, getCoveredMilestone} = useMilestones()
+  const {milestones, addMilestone, updateMilestone, removeMilestone, confirmMilestoneDate, getCoveredMilestone} = useMilestones()
 
   const theme = useMemo(
     () =>
@@ -332,12 +332,7 @@ export default function Home() {
                   >
                     <Rectangle className='cursor-pointer' backgroundColor={it.color} key={it.label} onClick={() => {
                       if (it.startDate) {
-                        customMilestoneRef.current?.open({
-                          label: it.label,
-                          color: it.color,
-                          startDate: it.startDate,
-                          endDate: it.endDate
-                        })
+                        customMilestoneRef.current?.open(it)
                       }
                     }}/>
                     <p>{it.label}</p>
@@ -393,9 +388,11 @@ export default function Home() {
           </div>
         </Stack>
       </main>
-      <CustomMilestoneDialog ref={customMilestoneRef} onAddMilestone={(milestone: Milestone) => {
-        addMilestone(milestone)
-      }}/>
+      <CustomMilestoneDialog
+        ref={customMilestoneRef}
+        onAddMilestone={(milestone: Milestone) => addMilestone(milestone)}
+        onUpdateMilestone={(oldLabel: string, milestone: Milestone) => updateMilestone(oldLabel, milestone)}
+      />
     </ThemeProvider>
   )
 }

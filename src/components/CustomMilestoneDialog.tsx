@@ -6,7 +6,7 @@ import {
   DialogTitle,
   TextField
 } from "@mui/material";
-import {FormEvent, forwardRef, Ref, useImperativeHandle, useState} from "react";
+import {FormEvent, forwardRef, Ref, useImperativeHandle, useRef, useState} from "react";
 import {Sketch} from "@uiw/react-color";
 import DateRangePicker from "@/components/DateRangePicker";
 import {twColorToHex} from "@/utils/colorUtil";
@@ -14,6 +14,7 @@ import useMilestones from "@/hooks/useMilestones";
 
 export type CustomMilestoneDialogProps = {
   onAddMilestone: (item: Milestone) => void
+  onUpdateMilestone: (oldLabel: string, item: Milestone) => void
 }
 export type Milestone = {
   label: string
@@ -33,12 +34,20 @@ function CustomMilestoneDialogComponent(props: CustomMilestoneDialogProps, ref: 
   const [labelError, setLabelError] = useState(false)
   const [labelHelperText, setLabelHelperText] = useState('')
   const [dateRange, setDateRange] = useState<Date[]>([])
+  const [mode, setMode] = useState('create')
+  const [isDefault, setDefault] = useState(false)
+  const oldLabelRef = useRef('')
 
   useImperativeHandle(ref, () => ({
     open: (milestone: Partial<Milestone>) => {
       console.log('milestone', milestone)
       setOpen(true)
-      milestone.label && setLabel(milestone.label)
+      if (milestone.label) {
+        setLabel(milestone.label)
+        setMode('update')
+        milestone.default && setDefault(milestone.default)
+        oldLabelRef.current = milestone.label
+      }
       milestone.color && setColor(twColorToHex(milestone.color))
       setDateRange([milestone.startDate!, milestone.endDate!])
     }
@@ -66,19 +75,29 @@ function CustomMilestoneDialogComponent(props: CustomMilestoneDialogProps, ref: 
     if (dateRange.length !== 2) {
       return
     }
-    if (isMilestoneExist(label)) {
-      setLabelError(true)
-      setLabelHelperText('里程碑已存在')
-      return
-    }
+    if (mode === 'create') {
+      if (isMilestoneExist(label)) {
+        setLabelError(true)
+        setLabelHelperText('里程碑已存在')
+        return
+      }
 
-    props.onAddMilestone({
-      label,
-      color: color,
-      startDate: dateRange[0],
-      endDate: dateRange[1],
-      default: false
-    })
+      props.onAddMilestone({
+        label,
+        color: color,
+        startDate: dateRange[0],
+        endDate: dateRange[1],
+        default: false
+      })
+    } else {
+      props.onUpdateMilestone(oldLabelRef.current, {
+        label,
+        color: color,
+        startDate: dateRange[0],
+        endDate: dateRange[1],
+        default: isDefault
+      })
+    }
     setOpen(false)
     resetForm()
   }
@@ -109,7 +128,7 @@ function CustomMilestoneDialogComponent(props: CustomMilestoneDialogProps, ref: 
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose}>取消</Button>
-        <Button onClick={handleSubmit}>添加</Button>
+        <Button onClick={handleSubmit}>{mode === 'create' ? '添加' : '更新'}</Button>
       </DialogActions>
     </Dialog>
   )

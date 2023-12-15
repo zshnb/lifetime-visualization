@@ -1,6 +1,6 @@
 import {useCallback, useEffect, useState} from "react";
 import {Milestone} from "@/components/CustomMilestoneDialog";
-import {addYears, endOfMonth, endOfWeek, parseISO, startOfWeek} from "date-fns";
+import {endOfMonth, endOfWeek, parseISO, startOfWeek} from "date-fns";
 import useStorage from "@/hooks/useStorage";
 import {sortMilestones} from "@/utils/milestoneUtil";
 
@@ -66,6 +66,15 @@ export default function useMilestones() {
       milestones
     })
   }, [milestones])
+
+  const updateMilestone = (oldLabel: string, milestone: Milestone) => {
+    const index = milestones.findIndex(it => it.label === oldLabel)
+    milestones[index] = milestone
+    setMilestones([...sortMilestones(milestones)])
+    save({
+      milestones
+    })
+  }
 
   const removeMilestone = useCallback((index: number) => {
     milestones.splice(index, 1)
@@ -158,6 +167,7 @@ export default function useMilestones() {
   return {
     milestones,
     addMilestone,
+    updateMilestone,
     removeMilestone,
     confirmMilestoneDate,
     isMilestoneExist,
