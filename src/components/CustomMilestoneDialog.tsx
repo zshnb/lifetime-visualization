@@ -11,23 +11,27 @@ import {Sketch} from "@uiw/react-color";
 import DateRangePicker from "@/components/DateRangePicker";
 import {twColorToHex} from "@/utils/colorUtil";
 import useMilestones from "@/hooks/useMilestones";
+import ImageUploader from "@/components/ImageUploader";
+import {FullScreenImageViewRef} from "@/components/FullScreenImageView";
 
 export type CustomMilestoneDialogProps = {
   onAddMilestone: (item: Milestone) => void
   onUpdateMilestone: (oldLabel: string, item: Milestone) => void
+  fullScreenImageViewRef: FullScreenImageViewRef | null
 }
 export type Milestone = {
   label: string
   startDate?: Date
   endDate?: Date
   color: string
-  order?: number
   default: boolean
   site?: string
+  images: string[]
 }
 export type CustomMilestoneDialogRef = {
   open: (milestone: Partial<Milestone>) => void
 }
+
 function CustomMilestoneDialogComponent(props: CustomMilestoneDialogProps, ref: Ref<CustomMilestoneDialogRef>) {
   const [open, setOpen] = useState(false)
   const [label, setLabel] = useState('')
@@ -38,6 +42,7 @@ function CustomMilestoneDialogComponent(props: CustomMilestoneDialogProps, ref: 
   const [dateRange, setDateRange] = useState<Date[]>([])
   const [mode, setMode] = useState('create')
   const [isDefault, setDefault] = useState(false)
+  const [images, setImages] = useState<string[]>([])
   const oldLabelRef = useRef('')
 
   useImperativeHandle(ref, () => ({
@@ -53,6 +58,7 @@ function CustomMilestoneDialogComponent(props: CustomMilestoneDialogProps, ref: 
       milestone.color && setColor(twColorToHex(milestone.color))
       setDateRange([milestone.startDate!, milestone.endDate!])
       setSite(milestone.site)
+      setImages(milestone.images || [])
     }
   }), []);
 
@@ -67,7 +73,7 @@ function CustomMilestoneDialogComponent(props: CustomMilestoneDialogProps, ref: 
     resetForm()
   }
 
-  const {isMilestoneExist}  = useMilestones()
+  const {isMilestoneExist} = useMilestones()
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
     if (!label) {
@@ -91,7 +97,8 @@ function CustomMilestoneDialogComponent(props: CustomMilestoneDialogProps, ref: 
         startDate: dateRange[0],
         endDate: dateRange[1],
         default: false,
-        site
+        site,
+        images
       })
     } else {
       props.onUpdateMilestone(oldLabelRef.current, {
@@ -100,7 +107,8 @@ function CustomMilestoneDialogComponent(props: CustomMilestoneDialogProps, ref: 
         startDate: dateRange[0],
         endDate: dateRange[1],
         default: isDefault,
-        site
+        site,
+        images
       })
     }
     setOpen(false)
@@ -141,6 +149,12 @@ function CustomMilestoneDialogComponent(props: CustomMilestoneDialogProps, ref: 
           </div>
           <DateRangePicker dateRange={dateRange} onAccept={(range: Date[]) => setDateRange(range)}/>
           <Sketch color={color} onChange={newShade => setColor(newShade.hex)}/>
+          <ImageUploader
+            existImages={images}
+            fullScreenImageViewRef={props.fullScreenImageViewRef}
+            onUploadImage={(image) => {
+              setImages([...images, image])
+            }}/>
         </form>
       </DialogContent>
       <DialogActions>
