@@ -10,49 +10,49 @@ export default function useMilestones() {
     {
       label: '童年',
       color: 'bg-zinc-400',
-      order: 0,
+      images: [],
       default: true
     },
     {
       label: '幼儿园',
       color: 'bg-red-600',
-      order: 1,
+      images: [],
       default: true
     },
     {
       label: '小学',
       color: 'bg-orange-400',
-      order: 2,
+      images: [],
       default: true
     },
     {
       label: '初中',
       color: 'bg-yellow-400',
-      order: 3,
+      images: [],
       default: true
     },
     {
       label: '高中',
       color: 'bg-rose-400',
-      order: 4,
+      images: [],
       default: true
     },
     {
       label: '大学本科',
       color: 'bg-cyan-400',
-      order: 5,
+      images: [],
       default: true
     },
     {
       label: '日常',
       color: 'bg-green-200',
-      order: 6,
+      images: [],
       default: true
     },
     {
       label: '今天',
       color: 'bg-sky-600',
-      order: 7,
+      images: [],
       default: true
     },
   ])
@@ -106,7 +106,7 @@ export default function useMilestones() {
           ...it,
           startDate,
           endDate: index < defaultMilestoneDurationYears.length ?
-            new Date(birthday.getFullYear() + defaultMilestoneDurationYears[index] + pastYears + extraSchoolGapYear, 6, 1) :
+            new Date(birthday.getFullYear() + defaultMilestoneDurationYears[index] + pastYears + extraSchoolGapYear, 5, 1) :
             undefined
         }
         pastYears += defaultMilestoneDurationYears[index]

@@ -43,6 +43,8 @@ import CustomMilestoneDialog, {CustomMilestoneDialogRef, Milestone} from "@/comp
 import useMilestones from "@/hooks/useMilestones";
 import {twColorToHex} from "@/utils/colorUtil";
 import useStorage from "@/hooks/useStorage";
+import FullScreenImageViewMemo, {FullScreenImageViewRef} from "@/components/FullScreenImageView";
+import Script from "next/script";
 
 type TimelineItemType = Pick<Milestone, 'label' | 'color' | 'startDate' | 'site'>
 export default function Home() {
@@ -275,6 +277,8 @@ export default function Home() {
 
   const customMilestoneRef = useRef<CustomMilestoneDialogRef>(null)
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
+  const fullScreenImageViewRef = useRef<FullScreenImageViewRef>(null)
   return (
     <ThemeProvider theme={theme}>
       <header className='px-20 pt-2 flex justify-between items-center'>
@@ -356,7 +360,7 @@ export default function Home() {
                 <p>预计寿命：{maxYear}岁</p>
                 <p>{aliveDisplay}</p>
                 <p>{remainDisplay}</p>
-                <p className='font-bold'>祝大家长命百岁</p>
+                <p className='font-bold'>祝你长命百岁</p>
               </div>
             )
           }
@@ -406,9 +410,11 @@ export default function Home() {
       </main>
       <CustomMilestoneDialog
         ref={customMilestoneRef}
+        fullScreenImageViewRef={fullScreenImageViewRef.current}
         onAddMilestone={(milestone: Milestone) => addMilestone(milestone)}
         onUpdateMilestone={(oldLabel: string, milestone: Milestone) => updateMilestone(oldLabel, milestone)}
       />
+      <FullScreenImageViewMemo ref={fullScreenImageViewRef}/>
     </ThemeProvider>
   )
 }
