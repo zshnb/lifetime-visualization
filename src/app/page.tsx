@@ -289,7 +289,7 @@ export default function Home() {
       </header>
       <main className='p-20 flex flex-col overflow-x-hidden'>
         <div className='pb-4 flex flex-col gap-2'>
-          <div className='flex flex-col items-start gap-y-2 w-1/4'>
+          <div className='flex flex-col items-start gap-y-4 xl:w-1/4 lg:w-3/5 w-full'>
             <LocalizationProvider dateAdapter={AdapterDateFns}>
               <DatePicker format='yyyy-MM-dd' className='w-full' label='生日' value={birthday}
                           onChange={handleChangeBirthday}/>
