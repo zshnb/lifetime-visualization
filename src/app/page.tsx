@@ -45,6 +45,9 @@ import {twColorToHex} from "@/utils/colorUtil";
 import useStorage from "@/hooks/useStorage";
 import FullScreenImageViewMemo, {FullScreenImageViewRef} from "@/components/FullScreenImageView";
 import Script from "next/script";
+import {Tabs} from "@mui/base";
+import TabsList from "@/components/tabs/TabsList";
+import Tab from "@/components/tabs/Tab";
 
 type TimelineItemType = Pick<Milestone, 'label' | 'color' | 'startDate' | 'site'>
 export default function Home() {
@@ -281,23 +284,26 @@ export default function Home() {
   const fullScreenImageViewRef = useRef<FullScreenImageViewRef>(null)
   return (
     <ThemeProvider theme={theme}>
-      <header className='px-20 pt-2 flex justify-between items-center'>
-        <p className='text-3xl'>人生进度表</p>
-        <a className='no-underline' href='https://github.com/zshnb/lifetime-visualization' target='_blank'>
-          <FontAwesomeIcon icon={faGithub} fontSize={30}/>
-        </a>
+      <header className='px-20 pt-20 flex flex-col justify-center items-center'>
+        <p className='text-2xl text-center'>rén shēng shí guāng zhóu</p>
+        <div className='flex ml-4'>
+          <p className='text-[58px] text-center'>人生时光轴</p>
+          <a className='no-underline self-end mb-4 ml-2' href='https://github.com/zshnb/lifetime-visualization' target='_blank'>
+            <FontAwesomeIcon icon={faGithub} fontSize={30}/>
+          </a>
+        </div>
       </header>
       <main className='p-20 flex flex-col overflow-x-hidden'>
         <div className='pb-4 flex flex-col gap-2'>
-          <div className='flex flex-col items-start gap-y-4 xl:w-1/4 lg:w-3/5 w-full'>
+          <div className='flex justify-center gap-x-4 w-full'>
             <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <DatePicker format='yyyy-MM-dd' className='w-full' label='生日' value={birthday}
+              <DatePicker format='yyyy-MM-dd' className='basis-1/5 grow-0' label='生日' value={birthday}
                           onChange={handleChangeBirthday}/>
             </LocalizationProvider>
             <TextField
-              label="预计寿命"
+              label="期望寿命"
               variant="outlined"
-              className='w-full'
+              className='basis-1/7 grow-0'
               value={maxYear}
               type='number'
               onChange={(e) => {
@@ -309,22 +315,6 @@ export default function Home() {
                   }
                 })
               }}/>
-            <FormControl>
-              <FormLabel>显示粒度</FormLabel>
-              <RadioGroup row value={unit} onChange={(e) => {
-                setUnit(parseInt(e.target.value))
-                save({
-                  user: {
-                    unit: parseInt(e.target.value)
-                  }
-                })
-              }}>
-                <FormControlLabel value={365} control={<Radio/>} label="日"/>
-                <FormControlLabel value={52} control={<Radio/>} label="周"/>
-                <FormControlLabel value={12} control={<Radio/>} label="月"/>
-                <FormControlLabel value={1} control={<Radio/>} label="年"/>
-              </RadioGroup>
-            </FormControl>
           </div>
           <div className='flex items-center gap-8 flex-wrap'>
             {
@@ -365,6 +355,16 @@ export default function Home() {
             )
           }
         </div>
+        <Tabs defaultValue={unit} onChange={(event, value) => {
+          setUnit(value as number)
+        }}>
+          <TabsList>
+            <Tab value={1}>年</Tab>
+            <Tab value={12}>月</Tab>
+            <Tab value={52}>周</Tab>
+            <Tab value={365}>日</Tab>
+          </TabsList>
+        </Tabs>
         <Stack direction='row' gap={2}>
           {
             timelineItems.length > 0 && (
