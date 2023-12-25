@@ -120,10 +120,6 @@ export default function Home() {
   }, [unit, validDate, birthday, maxYear])
 
   const getBackgroundColors = useCallback((day: number) => {
-    // 今天
-    if (day === liveDays) {
-      return twColorToHex('bg-sky-600')
-    }
     // 未来
     if (day > liveDays) {
       return twColorToHex('bg-white')
@@ -154,6 +150,10 @@ export default function Home() {
       if (colors.length) {
         return colors
       }
+    }
+    // 今天
+    if (day === liveDays) {
+      return ['#FFF', '#FF4A4A']
     }
 
     return twColorToHex('bg-green-200')
@@ -273,15 +273,15 @@ export default function Home() {
   }, [])
 
   const customMilestoneRef = useRef<CustomMilestoneDialogRef>(null)
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const hoveredIndexRef = useRef<number | null>(null)
 
   const fullScreenImageViewRef = useRef<FullScreenImageViewRef>(null)
   return (
     <ThemeProvider theme={theme}>
       <header className='pt-20 flex flex-col justify-center items-center'>
-        <p className='text-2xl text-center'>rén shēng shí guāng zhóu</p>
+        <p className='text-2xl text-center text-[#CAC6B4]'>rén shēng shí guāng zhóu</p>
         <div className='flex ml-4'>
-          <p className='text-[58px] text-center'>人生时光轴</p>
+          <p className='text-[50px] text-center font-extralight'>人生时光轴</p>
           <a className='no-underline self-end mb-4 ml-2' href='https://github.com/zshnb/lifetime-visualization' target='_blank'>
             <FontAwesomeIcon icon={faGithub} fontSize={30}/>
           </a>
@@ -327,8 +327,8 @@ export default function Home() {
                   <div
                     className='shrink-0 min-w-[116px] bg-white border border-solid border-[#D7D3C8] rounded-[14px] px-6 py-[10px] shadow-[0_2px_0_0_#D7D3C8] z-10 relative'
                     key={it.label}
-                    onMouseEnter={() => setHoveredIndex(index)}
-                    onMouseLeave={() => setHoveredIndex(null)}
+                    onMouseEnter={() => hoveredIndexRef.current = index}
+                    onMouseLeave={() => hoveredIndexRef.current = null}
                   >
                     <div className='cursor-pointer flex gap-2 justify-center items-center' onClick={() => {
                       customMilestoneRef.current?.open(it)
@@ -338,7 +338,7 @@ export default function Home() {
                     </div>
                     {
                       it.startDate && (
-                        <FontAwesomeIcon className={`${hoveredIndex === index ? 'inline' : 'hidden'} absolute top-[14px] right-2 cursor-pointer`} icon={faClose}
+                        <FontAwesomeIcon className={`${hoveredIndexRef.current === index ? 'inline' : 'hidden'} absolute top-[14px] right-2 cursor-pointer`} icon={faClose}
                                          onClick={() => removeMilestone(index)}/>
                       )
                     }
@@ -369,9 +369,14 @@ export default function Home() {
             )
           }
         </div>
-        <div className='flex justify-between items-center mb-4'>
-          <Tabs defaultValue={unit} onChange={(event, value) => {
+        <div className='flex justify-between items-center mb-[30px]'>
+          <Tabs value={unit} defaultValue={unit} onChange={(event, value) => {
             setUnit(value as number)
+            save({
+              user: {
+                unit: value as number
+              }
+            })
           }}>
             <TabsList>
               <Tab value={1}>年</Tab>
@@ -382,7 +387,7 @@ export default function Home() {
           </Tabs>
           <div className='flex gap-x-2 items-center'>
             <Rectangle backgroundColor={['#FFF', '#FF4A4A']}/>
-            <p>今天</p>
+            <p className='text-sm text-[#333]'>今天</p>
           </div>
         </div>
         <Stack direction='row' gap={2}>
