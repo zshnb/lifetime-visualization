@@ -190,12 +190,6 @@ export default function Home() {
         key={it}
         date={validDate ? date : undefined}
         unit={unit}
-        onClick={() => {
-          customMilestoneRef.current?.open({
-            startDate: date,
-            endDate: date
-          })
-        }}
         backgroundColor={backgroundColor}
         milestones={validMilestones}
       />
@@ -284,7 +278,7 @@ export default function Home() {
   const fullScreenImageViewRef = useRef<FullScreenImageViewRef>(null)
   return (
     <ThemeProvider theme={theme}>
-      <header className='px-20 pt-20 flex flex-col justify-center items-center'>
+      <header className='pt-20 flex flex-col justify-center items-center'>
         <p className='text-2xl text-center'>rén shēng shí guāng zhóu</p>
         <div className='flex ml-4'>
           <p className='text-[58px] text-center'>人生时光轴</p>
@@ -293,7 +287,7 @@ export default function Home() {
           </a>
         </div>
       </header>
-      <main className='p-20 flex flex-col overflow-x-hidden'>
+      <main className='py-7 px-20 flex flex-col overflow-x-hidden'>
         <div className='pb-4 flex flex-col gap-2'>
           <div className='flex justify-center gap-x-4 w-full'>
             <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -326,21 +320,25 @@ export default function Home() {
                 })
               }}/>
           </div>
-          <div className='flex items-center gap-8 flex-nowrap overflow-x-auto mx-[-3rem] py-1 relative'>
+          <div className='flex items-center gap-8 flex-nowrap overflow-x-auto mx-[-3rem] p-1 relative'>
             {
               milestones.map((it, index) => {
                 return (
                   <div
-                    className='flex shrink-0 gap-2 justify-center items-center min-w-[116px] bg-white border border-solid border-[#D7D3C8] rounded-[14px] px-6 py-[10px] shadow-[0_2px_0_0_#D7D3C8] z-10'
+                    className='shrink-0 min-w-[116px] bg-white border border-solid border-[#D7D3C8] rounded-[14px] px-6 py-[10px] shadow-[0_2px_0_0_#D7D3C8] z-10 relative'
                     key={it.label}
                     onMouseEnter={() => setHoveredIndex(index)}
                     onMouseLeave={() => setHoveredIndex(null)}
                   >
-                    <Rectangle className='cursor-pointer' backgroundColor={it.color} key={it.label}/>
-                    <p>{it.label}</p>
+                    <div className='cursor-pointer flex gap-2 justify-center items-center' onClick={() => {
+                      customMilestoneRef.current?.open(it)
+                    }}>
+                      <Rectangle className='cursor-pointer' backgroundColor={it.color} key={it.label}/>
+                      <p>{it.label}</p>
+                    </div>
                     {
                       it.startDate && (
-                        <FontAwesomeIcon className={`${hoveredIndex === index ? 'inline' : 'hidden'}`} icon={faClose}
+                        <FontAwesomeIcon className={`${hoveredIndex === index ? 'inline' : 'hidden'} absolute top-[14px] right-2 cursor-pointer`} icon={faClose}
                                          onClick={() => removeMilestone(index)}/>
                       )
                     }
@@ -357,8 +355,8 @@ export default function Home() {
               <FontAwesomeIcon icon={faPlus}/>
               <p>添加人生节点</p>
             </div>
+            <Divider className='absolute top-7 left-0 w-full bg-[#726647]'/>
           </div>
-          <Divider className='absolute top-[23rem] left-0 w-full bg-[#726647]'/>
           {
             validDate && birthday && (
               <div className='flex gap-x-2'>
@@ -371,16 +369,22 @@ export default function Home() {
             )
           }
         </div>
-        <Tabs defaultValue={unit} onChange={(event, value) => {
-          setUnit(value as number)
-        }}>
-          <TabsList>
-            <Tab value={1}>年</Tab>
-            <Tab value={12}>月</Tab>
-            <Tab value={52}>周</Tab>
-            <Tab value={365}>日</Tab>
-          </TabsList>
-        </Tabs>
+        <div className='flex justify-between items-center mb-4'>
+          <Tabs defaultValue={unit} onChange={(event, value) => {
+            setUnit(value as number)
+          }}>
+            <TabsList>
+              <Tab value={1}>年</Tab>
+              <Tab value={12}>月</Tab>
+              <Tab value={52}>周</Tab>
+              <Tab value={365}>日</Tab>
+            </TabsList>
+          </Tabs>
+          <div className='flex gap-x-2 items-center'>
+            <Rectangle backgroundColor={['#FFF', '#FF4A4A']}/>
+            <p>今天</p>
+          </div>
+        </div>
         <Stack direction='row' gap={2}>
           {
             timelineItems.length > 0 && (

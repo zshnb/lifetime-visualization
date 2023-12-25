@@ -5,7 +5,6 @@ const TabsList = styled(BaseTabsList)(
   width: fit-content;
   background-color: #E8E3D8;
   border-radius: 20px;
-  margin-bottom: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
