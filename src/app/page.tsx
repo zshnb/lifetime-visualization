@@ -65,6 +65,17 @@ export default function Home() {
         palette: {
           mode: prefersDarkMode ? 'dark' : 'light',
         },
+        components: {
+          MuiTextField: {
+            styleOverrides: {
+              root: {
+                input: {
+                  color: 'black'
+                }
+              }
+            }
+          }
+        }
       }),
     [prefersDarkMode],
   );
@@ -283,7 +294,7 @@ export default function Home() {
       </header>
       <main className='py-7 px-20 flex flex-col overflow-x-hidden'>
         <div className='pb-4 flex flex-col gap-2'>
-          <div className='flex justify-center gap-x-4 w-full'>
+          <div className='flex flex-col md:flex-row justify-center gap-4 w-full'>
             <LocalizationProvider dateAdapter={AdapterDateFns}>
               <DatePicker
                 sx={{
@@ -384,48 +395,9 @@ export default function Home() {
             <p className='text-sm text-[#333]'>今天</p>
           </div>
         </div>
-        <Stack direction='row' gap={2}>
-          {
-            timelineItems.length > 0 && (
-              <div className='basis-80 hidden md:flex'>
-                <Timeline position="right">
-                  {
-                    timelineItems.map((it) => (
-                      <TimelineItem>
-                        <TimelineOppositeContent color="text.secondary">
-                          {it.startDate && format(it.startDate, 'yyyy-MM-dd')}
-                          <FontAwesomeIcon icon={faCalendar} style={{marginLeft: '0.5rem'}}/>
-                        </TimelineOppositeContent>
-                        <TimelineSeparator>
-                          <TimelineDot
-                            sx={{color: twColorToHex(it.color), backgroundColor: twColorToHex(it.color)}}/>
-                          <TimelineConnector/>
-                        </TimelineSeparator>
-                        <TimelineContent>
-                          <div className='flex gap-2 items-center'>
-                            <FontAwesomeIcon icon={faTag} style={{color: '#666666'}}/>
-                            <p>{it.label}</p>
-                          </div>
-                          {
-                            it.site && (
-                              <div className='flex gap-2 items-center'>
-                                <FontAwesomeIcon icon={faLocationDot} style={{color: '#666666'}}/>
-                                <p>{it.site}</p>
-                              </div>
-                            )
-                          }
-                        </TimelineContent>
-                      </TimelineItem>
-                    ))
-                  }
-                </Timeline>
-              </div>
-            )
-          }
-          <div className='flex flex-wrap gap-1 basis-40 grow content-start'>
-            {rectangles}
-          </div>
-        </Stack>
+        <div className='flex flex-wrap gap-1 basis-40 grow content-start'>
+          {rectangles}
+        </div>
       </main>
       <CustomMilestoneDialog
         ref={customMilestoneRef}

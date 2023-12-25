@@ -27,7 +27,7 @@ export default function RootLayout({
       <head>
         <link rel='icon' href='favicon.ico'/>
       </head>
-      <html lang="en" className='bg-[#F1EFE4]'>
+      <html lang="en" className='bg-[#F1EFE4] dark:bg-slate-800'>
       <body className={inter.className}>{children}</body>
       <Script async src="https://www.googletagmanager.com/gtag/js?id=G-M78LJWJ2HM"></Script>
       </html>
