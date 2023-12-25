@@ -16,11 +16,6 @@ import {
 } from "date-fns";
 import {
   createTheme, Divider,
-  FormControl,
-  FormControlLabel,
-  FormLabel,
-  Radio,
-  RadioGroup,
   Stack,
   TextField,
   ThemeProvider,
@@ -44,7 +39,6 @@ import useMilestones from "@/hooks/useMilestones";
 import {twColorToHex} from "@/utils/colorUtil";
 import useStorage from "@/hooks/useStorage";
 import FullScreenImageViewMemo, {FullScreenImageViewRef} from "@/components/FullScreenImageView";
-import Script from "next/script";
 import {Tabs} from "@mui/base";
 import TabsList from "@/components/tabs/TabsList";
 import Tab from "@/components/tabs/Tab";
