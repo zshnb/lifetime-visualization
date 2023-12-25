@@ -387,7 +387,7 @@ export default function Home() {
         <Stack direction='row' gap={2}>
           {
             timelineItems.length > 0 && (
-              <div className='basis-80'>
+              <div className='basis-80 hidden md:flex'>
                 <Timeline position="right">
                   {
                     timelineItems.map((it) => (
