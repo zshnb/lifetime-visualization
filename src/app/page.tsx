@@ -15,7 +15,7 @@ import {
   isBefore, min, toDate
 } from "date-fns";
 import {
-  createTheme,
+  createTheme, Divider,
   FormControl,
   FormControlLabel,
   FormLabel,
@@ -28,7 +28,7 @@ import {
 } from "@mui/material";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faGithub} from '@fortawesome/free-brands-svg-icons'
-import {faClose, faTag, faLocationDot, faCalendar} from '@fortawesome/free-solid-svg-icons'
+import {faClose, faTag, faLocationDot, faCalendar, faPlus} from '@fortawesome/free-solid-svg-icons'
 import {useDebouncedCallback} from "use-debounce";
 import {
   Timeline,
@@ -126,7 +126,7 @@ export default function Home() {
     }
     // 未来
     if (day > liveDays) {
-      return twColorToHex('bg-slate-200')
+      return twColorToHex('bg-white')
     }
 
     if (birthday) {
@@ -297,13 +297,23 @@ export default function Home() {
         <div className='pb-4 flex flex-col gap-2'>
           <div className='flex justify-center gap-x-4 w-full'>
             <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <DatePicker format='yyyy-MM-dd' className='basis-1/5 grow-0' label='生日' value={birthday}
-                          onChange={handleChangeBirthday}/>
+              <DatePicker
+                sx={{
+                  "& fieldset": { border: 'none' },
+                }}
+                format='yyyy-MM-dd'
+                className='basis-1/5 grow-0 bg-white rounded-[20px]'
+                label='生日'
+                value={birthday}
+                onChange={handleChangeBirthday}/>
             </LocalizationProvider>
             <TextField
               label="期望寿命"
               variant="outlined"
-              className='basis-1/7 grow-0'
+              className='basis-1/7 grow-0 bg-white rounded-[20px]'
+              sx={{
+                "& fieldset": { border: 'none' },
+              }}
               value={maxYear}
               type='number'
               onChange={(e) => {
@@ -316,21 +326,17 @@ export default function Home() {
                 })
               }}/>
           </div>
-          <div className='flex items-center gap-8 flex-wrap'>
+          <div className='flex items-center gap-8 flex-nowrap overflow-x-auto mx-[-3rem] py-1 relative'>
             {
               milestones.map((it, index) => {
                 return (
                   <div
-                    className='flex gap-1 items-center'
+                    className='flex shrink-0 gap-2 justify-center items-center min-w-[116px] bg-white border border-solid border-[#D7D3C8] rounded-[14px] px-6 py-[10px] shadow-[0_2px_0_0_#D7D3C8] z-10'
                     key={it.label}
                     onMouseEnter={() => setHoveredIndex(index)}
                     onMouseLeave={() => setHoveredIndex(null)}
                   >
-                    <Rectangle className='cursor-pointer' backgroundColor={it.color} key={it.label} onClick={() => {
-                      if (it.startDate) {
-                        customMilestoneRef.current?.open(it)
-                      }
-                    }}/>
+                    <Rectangle className='cursor-pointer' backgroundColor={it.color} key={it.label}/>
                     <p>{it.label}</p>
                     {
                       it.startDate && (
@@ -342,7 +348,17 @@ export default function Home() {
                 )
               })
             }
+            <div
+              className='flex shrink-0 gap-2 justify-center items-center min-w-[116px] bg-[#E8E3D3] rounded-[14px] px-6 py-[10px] shadow-[0_2px_0_0_#D7D3C8] text-[#726647] cursor-pointer z-10'
+              onClick={() => {
+                customMilestoneRef.current?.open({})
+              }}
+            >
+              <FontAwesomeIcon icon={faPlus}/>
+              <p>添加人生节点</p>
+            </div>
           </div>
+          <Divider className='absolute top-[23rem] left-0 w-full bg-[#726647]'/>
           {
             validDate && birthday && (
               <div className='flex gap-x-2'>
