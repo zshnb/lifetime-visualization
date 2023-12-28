@@ -48,19 +48,13 @@ export default function useMilestones() {
       color: 'bg-green-200',
       images: [],
       default: true
-    },
-    {
-      label: '今天',
-      color: 'bg-sky-600',
-      images: [],
-      default: true
-    },
+    }
   ])
 
   const {save, load} = useStorage()
 
   const addMilestone = useCallback((milestone: Milestone) => {
-    milestones.splice(milestones.length - 2, 0, milestone)
+    milestones.splice(milestones.length - 1, 0, milestone)
     setMilestones([...sortMilestones(milestones)])
     save({
       milestones

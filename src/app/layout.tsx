@@ -2,13 +2,20 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import Script from "next/script";
+import {siteConfig} from "@/app/site";
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: '人生进度表',
-  description: '人生进度表 - 可视化你的人生',
-}
+  title: siteConfig.name,
+  description: siteConfig.description,
+  keywords: siteConfig.keywords,
+  authors: siteConfig.authors,
+  creator: siteConfig.creator,
+  icons: siteConfig.icons,
+  openGraph: siteConfig.openGraph,
+  twitter: siteConfig.twitter,
+};
 
 export default function RootLayout({
   children,
@@ -17,7 +24,10 @@ export default function RootLayout({
 }) {
   return (
     <>
-      <html lang="en">
+      <head>
+        <link rel='icon' href='favicon.ico'/>
+      </head>
+      <html lang="en" className='bg-[#F1EFE4] dark:bg-slate-800'>
       <body className={inter.className}>{children}</body>
       <Script async src="https://www.googletagmanager.com/gtag/js?id=G-M78LJWJ2HM"></Script>
       </html>

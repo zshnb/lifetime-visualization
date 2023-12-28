@@ -15,12 +15,7 @@ import {
   isBefore, min, toDate
 } from "date-fns";
 import {
-  createTheme,
-  FormControl,
-  FormControlLabel,
-  FormLabel,
-  Radio,
-  RadioGroup,
+  createTheme, Divider,
   Stack,
   TextField,
   ThemeProvider,
@@ -28,7 +23,7 @@ import {
 } from "@mui/material";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faGithub} from '@fortawesome/free-brands-svg-icons'
-import {faClose, faTag, faLocationDot, faCalendar} from '@fortawesome/free-solid-svg-icons'
+import {faClose, faTag, faLocationDot, faCalendar, faPlus} from '@fortawesome/free-solid-svg-icons'
 import {useDebouncedCallback} from "use-debounce";
 import {
   Timeline,
@@ -44,7 +39,9 @@ import useMilestones from "@/hooks/useMilestones";
 import {twColorToHex} from "@/utils/colorUtil";
 import useStorage from "@/hooks/useStorage";
 import FullScreenImageViewMemo, {FullScreenImageViewRef} from "@/components/FullScreenImageView";
-import Script from "next/script";
+import {Tabs} from "@mui/base";
+import TabsList from "@/components/tabs/TabsList";
+import Tab from "@/components/tabs/Tab";
 
 type TimelineItemType = Pick<Milestone, 'label' | 'color' | 'startDate' | 'site'>
 export default function Home() {
@@ -68,6 +65,17 @@ export default function Home() {
         palette: {
           mode: prefersDarkMode ? 'dark' : 'light',
         },
+        components: {
+          MuiTextField: {
+            styleOverrides: {
+              root: {
+                input: {
+                  color: 'black'
+                }
+              }
+            }
+          }
+        }
       }),
     [prefersDarkMode],
   );
@@ -117,13 +125,9 @@ export default function Home() {
   }, [unit, validDate, birthday, maxYear])
 
   const getBackgroundColors = useCallback((day: number) => {
-    // 今天
-    if (day === liveDays) {
-      return twColorToHex('bg-sky-600')
-    }
     // 未来
     if (day > liveDays) {
-      return twColorToHex('bg-slate-200')
+      return twColorToHex('bg-white')
     }
 
     if (birthday) {
@@ -151,6 +155,10 @@ export default function Home() {
       if (colors.length) {
         return colors
       }
+    }
+    // 今天
+    if (day === liveDays) {
+      return ['#FFF', '#FF4A4A']
     }
 
     return twColorToHex('bg-green-200')
@@ -187,12 +195,6 @@ export default function Home() {
         key={it}
         date={validDate ? date : undefined}
         unit={unit}
-        onClick={() => {
-          customMilestoneRef.current?.open({
-            startDate: date,
-            endDate: date
-          })
-        }}
         backgroundColor={backgroundColor}
         milestones={validMilestones}
       />
@@ -276,28 +278,41 @@ export default function Home() {
   }, [])
 
   const customMilestoneRef = useRef<CustomMilestoneDialogRef>(null)
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const hoveredIndexRef = useRef<number | null>(null)
 
   const fullScreenImageViewRef = useRef<FullScreenImageViewRef>(null)
   return (
     <ThemeProvider theme={theme}>
-      <header className='px-20 pt-2 flex justify-between items-center'>
-        <p className='text-3xl'>人生进度表</p>
-        <a className='no-underline' href='https://github.com/zshnb/lifetime-visualization' target='_blank'>
-          <FontAwesomeIcon icon={faGithub} fontSize={30}/>
-        </a>
+      <header className='pt-20 flex flex-col justify-center items-center'>
+        <p className='text-2xl text-center text-[#CAC6B4]'>rén shēng shí guāng zhóu</p>
+        <div className='flex ml-4'>
+          <p className='text-[50px] text-center font-extralight'>人生时光轴</p>
+          <a className='no-underline self-end mb-4 ml-2' href='https://github.com/zshnb/lifetime-visualization' target='_blank'>
+            <FontAwesomeIcon icon={faGithub} fontSize={30}/>
+          </a>
+        </div>
       </header>
-      <main className='p-20 flex flex-col overflow-x-hidden'>
+      <main className='py-7 px-20 flex flex-col overflow-x-hidden'>
         <div className='pb-4 flex flex-col gap-2'>
-          <div className='flex flex-col items-start gap-y-2 w-1/4'>
+          <div className='flex flex-col md:flex-row justify-center gap-4 w-full'>
             <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <DatePicker format='yyyy-MM-dd' className='w-full' label='生日' value={birthday}
-                          onChange={handleChangeBirthday}/>
+              <DatePicker
+                sx={{
+                  "& fieldset": { border: 'none' },
+                }}
+                format='yyyy-MM-dd'
+                className='basis-1/5 grow-0 bg-white rounded-[20px]'
+                label='生日'
+                value={birthday}
+                onChange={handleChangeBirthday}/>
             </LocalizationProvider>
             <TextField
-              label="预计寿命"
+              label="期望寿命"
               variant="outlined"
-              className='w-full'
+              className='basis-1/7 grow-0 bg-white rounded-[20px]'
+              sx={{
+                "& fieldset": { border: 'none' },
+              }}
               value={maxYear}
               type='number'
               onChange={(e) => {
@@ -309,42 +324,26 @@ export default function Home() {
                   }
                 })
               }}/>
-            <FormControl>
-              <FormLabel>显示粒度</FormLabel>
-              <RadioGroup row value={unit} onChange={(e) => {
-                setUnit(parseInt(e.target.value))
-                save({
-                  user: {
-                    unit: parseInt(e.target.value)
-                  }
-                })
-              }}>
-                <FormControlLabel value={365} control={<Radio/>} label="日"/>
-                <FormControlLabel value={52} control={<Radio/>} label="周"/>
-                <FormControlLabel value={12} control={<Radio/>} label="月"/>
-                <FormControlLabel value={1} control={<Radio/>} label="年"/>
-              </RadioGroup>
-            </FormControl>
           </div>
-          <div className='flex items-center gap-8 flex-wrap'>
+          <div className='flex items-center gap-8 flex-nowrap overflow-x-auto mx-[-3rem] p-1 relative'>
             {
               milestones.map((it, index) => {
                 return (
                   <div
-                    className='flex gap-1 items-center'
+                    className='shrink-0 min-w-[116px] bg-white border border-solid border-[#D7D3C8] rounded-[14px] px-6 py-[10px] shadow-[0_2px_0_0_#D7D3C8] z-10 relative'
                     key={it.label}
-                    onMouseEnter={() => setHoveredIndex(index)}
-                    onMouseLeave={() => setHoveredIndex(null)}
+                    onMouseEnter={() => hoveredIndexRef.current = index}
+                    onMouseLeave={() => hoveredIndexRef.current = null}
                   >
-                    <Rectangle className='cursor-pointer' backgroundColor={it.color} key={it.label} onClick={() => {
-                      if (it.startDate) {
-                        customMilestoneRef.current?.open(it)
-                      }
-                    }}/>
-                    <p>{it.label}</p>
+                    <div className='cursor-pointer flex gap-2 justify-center items-center' onClick={() => {
+                      customMilestoneRef.current?.open(it)
+                    }}>
+                      <Rectangle className='cursor-pointer' backgroundColor={it.color} key={it.label}/>
+                      <p>{it.label}</p>
+                    </div>
                     {
                       it.startDate && (
-                        <FontAwesomeIcon className={`${hoveredIndex === index ? 'inline' : 'hidden'}`} icon={faClose}
+                        <FontAwesomeIcon className={`${hoveredIndexRef.current === index ? 'inline' : 'hidden'} absolute top-[14px] right-2 cursor-pointer`} icon={faClose}
                                          onClick={() => removeMilestone(index)}/>
                       )
                     }
@@ -352,6 +351,16 @@ export default function Home() {
                 )
               })
             }
+            <div
+              className='flex shrink-0 gap-2 justify-center items-center min-w-[116px] bg-[#E8E3D3] rounded-[14px] px-6 py-[10px] shadow-[0_2px_0_0_#D7D3C8] text-[#726647] cursor-pointer z-10'
+              onClick={() => {
+                customMilestoneRef.current?.open({})
+              }}
+            >
+              <FontAwesomeIcon icon={faPlus}/>
+              <p>添加人生节点</p>
+            </div>
+            <Divider className='absolute top-7 left-0 w-full bg-[#726647]'/>
           </div>
           {
             validDate && birthday && (
@@ -365,48 +374,30 @@ export default function Home() {
             )
           }
         </div>
-        <Stack direction='row' gap={2}>
-          {
-            timelineItems.length > 0 && (
-              <div className='basis-80'>
-                <Timeline position="right">
-                  {
-                    timelineItems.map((it) => (
-                      <TimelineItem>
-                        <TimelineOppositeContent color="text.secondary">
-                          {it.startDate && format(it.startDate, 'yyyy-MM-dd')}
-                          <FontAwesomeIcon icon={faCalendar} style={{marginLeft: '0.5rem'}}/>
-                        </TimelineOppositeContent>
-                        <TimelineSeparator>
-                          <TimelineDot
-                            sx={{color: twColorToHex(it.color), backgroundColor: twColorToHex(it.color)}}/>
-                          <TimelineConnector/>
-                        </TimelineSeparator>
-                        <TimelineContent>
-                          <div className='flex gap-2 items-center'>
-                            <FontAwesomeIcon icon={faTag} style={{color: '#666666'}}/>
-                            <p>{it.label}</p>
-                          </div>
-                          {
-                            it.site && (
-                              <div className='flex gap-2 items-center'>
-                                <FontAwesomeIcon icon={faLocationDot} style={{color: '#666666'}}/>
-                                <p>{it.site}</p>
-                              </div>
-                            )
-                          }
-                        </TimelineContent>
-                      </TimelineItem>
-                    ))
-                  }
-                </Timeline>
-              </div>
-            )
-          }
-          <div className='flex flex-wrap gap-1 basis-40 grow content-start'>
-            {rectangles}
+        <div className='flex justify-between items-center mb-[30px]'>
+          <Tabs value={unit} defaultValue={unit} onChange={(event, value) => {
+            setUnit(value as number)
+            save({
+              user: {
+                unit: value as number
+              }
+            })
+          }}>
+            <TabsList>
+              <Tab value={1}>年</Tab>
+              <Tab value={12}>月</Tab>
+              <Tab value={52}>周</Tab>
+              <Tab value={365}>日</Tab>
+            </TabsList>
+          </Tabs>
+          <div className='flex gap-x-2 items-center'>
+            <Rectangle backgroundColor={['#FFF', '#FF4A4A']}/>
+            <p className='text-sm text-[#333]'>今天</p>
           </div>
-        </Stack>
+        </div>
+        <div className='flex flex-wrap gap-1 basis-40 grow content-start'>
+          {rectangles}
+        </div>
       </main>
       <CustomMilestoneDialog
         ref={customMilestoneRef}
