@@ -42,6 +42,8 @@ import FullScreenImageViewMemo, {FullScreenImageViewRef} from "@/components/Full
 import {Tabs} from "@mui/base";
 import TabsList from "@/components/tabs/TabsList";
 import Tab from "@/components/tabs/Tab";
+import MilestoneRectangle from "@/components/Milestone";
+import Image from "next/image";
 
 type TimelineItemType = Pick<Milestone, 'label' | 'color' | 'startDate' | 'site'>
 export default function Home() {
@@ -265,7 +267,6 @@ export default function Home() {
   }, [])
 
   const customMilestoneRef = useRef<CustomMilestoneDialogRef>(null)
-  const hoveredIndexRef = useRef<number | null>(null)
 
   const fullScreenImageViewRef = useRef<FullScreenImageViewRef>(null)
   return (
@@ -273,9 +274,9 @@ export default function Home() {
       <header className='pt-20 flex flex-col justify-center items-center'>
         <p className='text-2xl text-center text-[#CAC6B4]'>rén shēng shí guāng zhóu</p>
         <div className='flex ml-4'>
-          <p className='text-[50px] text-center font-extralight'>人生时光轴</p>
+          <p className='text-[50px] text-center font-extralight text-[#726647]'>人生时光轴</p>
           <a className='no-underline self-end mb-4 ml-2' href='https://github.com/zshnb/lifetime-visualization' target='_blank'>
-            <FontAwesomeIcon icon={faGithub} fontSize={30}/>
+            <FontAwesomeIcon icon={faGithub} fontSize={26} color={'#CAC6B4'}/>
           </a>
         </div>
       </header>
@@ -313,53 +314,30 @@ export default function Home() {
               }}/>
           </div>
           <div className='flex items-center gap-8 flex-nowrap overflow-x-auto px-20 py-4 relative'>
+            <div className='self-start min-w-[50px]'>
+              <Image src='/lifetime/cake.svg' alt='cake' width={50} height={50}/>
+            </div>
             {
               milestones.map((it, index) => {
-                return (
-                  <div
-                    className='shrink-0 min-w-[116px] bg-white border border-solid border-[#D7D3C8] rounded-[14px] px-6 py-[10px] shadow-[0_2px_0_0_#D7D3C8] z-10 relative'
-                    key={it.label}
-                    onMouseEnter={() => hoveredIndexRef.current = index}
-                    onMouseLeave={() => hoveredIndexRef.current = null}
-                  >
-                    <div className='cursor-pointer flex gap-2 justify-center items-center' onClick={() => {
-                      customMilestoneRef.current?.open(it)
-                    }}>
-                      <Rectangle className='cursor-pointer' backgroundColor={it.color} key={it.label}/>
-                      <p>{it.label}</p>
-                    </div>
-                    {
-                      it.startDate && (
-                        <FontAwesomeIcon className={`${hoveredIndexRef.current === index ? 'inline' : 'hidden'} absolute top-[14px] right-2 cursor-pointer`} icon={faClose}
-                                         onClick={() => removeMilestone(index)}/>
-                      )
-                    }
-                  </div>
-                )
+                return <MilestoneRectangle
+                  key={it.label}
+                  customMilestoneRef={customMilestoneRef}
+                  milestone={it}
+                  index={index}
+                />
               })
             }
             <div
-              className='flex shrink-0 gap-2 justify-center items-center min-w-[116px] bg-[#E8E3D3] rounded-[14px] px-6 py-[10px] shadow-[0_2px_0_0_#D7D3C8] text-[#726647] cursor-pointer z-10'
+              className='flex shrink-0 gap-2 justify-center items-center self-start min-w-[116px] bg-[#E8E3D3] rounded-[14px] px-6 py-[10px] shadow-[0_2px_0_0_#D7D3C8] text-[#726647] cursor-pointer z-10'
               onClick={() => {
                 customMilestoneRef.current?.open({})
               }}
             >
-              <FontAwesomeIcon icon={faPlus}/>
+              <Image src='/lifetime/plus.svg' alt='cake' width={21} height={22}/>
               <p>添加人生节点</p>
             </div>
             <Divider className='absolute top-10 left-0 w-full bg-[#726647]'/>
           </div>
-          {
-            validDate && birthday && (
-              <div className='flex gap-x-2'>
-                <p>你的生日：{format(birthday, 'yyyy-MM-dd')}</p>
-                <p>预计寿命：{maxYear}岁</p>
-                <p>{aliveDisplay}</p>
-                <p>{remainDisplay}</p>
-                <p className='font-bold'>祝你长命百岁</p>
-              </div>
-            )
-          }
         </div>
         <div className='px-20 flex justify-between items-center mb-[30px]'>
           <Tabs value={unit} defaultValue={unit} onChange={(event, value) => {
