@@ -12,7 +12,7 @@ import {
   differenceInMonths,
   differenceInWeeks,
   differenceInYears, format,
-  isBefore, min, toDate
+  isBefore, min, startOfWeek, toDate
 } from "date-fns";
 import {
   createTheme, Divider,
@@ -98,38 +98,35 @@ export default function Home() {
     }
   }, 500)
 
-  const liveDays = useMemo(() => {
-    let days = 0
-    if (validDate && birthday) {
-      const date = min([new Date(), addYears(birthday, maxYear)])
+  const todayIndex = useMemo(() => {
+    if (birthday) {
+      const date = new Date()
       switch (unit) {
         case 365: {
-          days = differenceInDays(date, birthday)
-          break
+          return differenceInDays(date, birthday)
         }
         case 52: {
-          days = differenceInWeeks(date, birthday)
-          break
+          const rightDate = new Date(birthday.getFullYear(), birthday.getMonth(), startOfWeek(birthday).getDay())
+          return differenceInWeeks(date, rightDate)
         }
         case 12: {
-          days = differenceInMonths(date, birthday)
-          break
+          const rightDate = new Date(birthday.getFullYear(), birthday.getMonth(), 1)
+          return differenceInMonths(date, rightDate)
         }
         case 1: {
-          days = differenceInYears(date, birthday)
-          break
+          const rightDate = new Date(birthday.getFullYear(), 0, 1)
+          return differenceInYears(date, rightDate)
+        }
+        default: {
+          return 0
         }
       }
+    } else {
+      return 0
     }
-    return days;
-  }, [unit, validDate, birthday, maxYear])
+  }, [unit, birthday])
 
   const getBackgroundColors = useCallback((day: number) => {
-    // 未来
-    if (day > liveDays) {
-      return twColorToHex('bg-white')
-    }
-
     if (birthday) {
       let date = new Date()
       switch (unit) {
@@ -156,13 +153,19 @@ export default function Home() {
         return colors
       }
     }
+
     // 今天
-    if (day === liveDays) {
+    if (day === todayIndex) {
       return ['#FFF', '#FF4A4A']
     }
 
+    // 未来
+    if (day > todayIndex) {
+      return twColorToHex('bg-white')
+    }
+
     return twColorToHex('bg-green-200')
-  }, [liveDays, birthday, unit, getCoveredMilestone])
+  }, [birthday, unit, getCoveredMilestone, todayIndex])
 
 
   const rectangles = useMemo(() => {
@@ -249,22 +252,6 @@ export default function Home() {
     }
   }, [unit, validDate, birthday, maxYear])
 
-  const timelineItems: TimelineItemType[] = useMemo(() => {
-    if (validDate) {
-      return milestones.filter(it => it.startDate !== undefined && isBefore(it.startDate, new Date()))
-        .map(it => {
-          return {
-            startDate: it.startDate,
-            label: it.label,
-            color: it.color,
-            site: it.site
-          }
-        })
-    } else {
-      return []
-    }
-  }, [validDate, milestones])
-
   useEffect(() => {
     const data = load()
     if (data?.user) {
@@ -292,7 +279,7 @@ export default function Home() {
           </a>
         </div>
       </header>
-      <main className='py-7 px-20 flex flex-col overflow-x-hidden'>
+      <main className='py-7 flex flex-col overflow-x-hidden'>
         <div className='pb-4 flex flex-col gap-2'>
           <div className='flex flex-col md:flex-row justify-center gap-4 w-full'>
             <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -325,7 +312,7 @@ export default function Home() {
                 })
               }}/>
           </div>
-          <div className='flex items-center gap-8 flex-nowrap overflow-x-auto mx-[-3rem] p-1 relative'>
+          <div className='flex items-center gap-8 flex-nowrap overflow-x-auto px-20 py-4 relative'>
             {
               milestones.map((it, index) => {
                 return (
@@ -360,7 +347,7 @@ export default function Home() {
               <FontAwesomeIcon icon={faPlus}/>
               <p>添加人生节点</p>
             </div>
-            <Divider className='absolute top-7 left-0 w-full bg-[#726647]'/>
+            <Divider className='absolute top-10 left-0 w-full bg-[#726647]'/>
           </div>
           {
             validDate && birthday && (
@@ -374,7 +361,7 @@ export default function Home() {
             )
           }
         </div>
-        <div className='flex justify-between items-center mb-[30px]'>
+        <div className='px-20 flex justify-between items-center mb-[30px]'>
           <Tabs value={unit} defaultValue={unit} onChange={(event, value) => {
             setUnit(value as number)
             save({
@@ -395,7 +382,7 @@ export default function Home() {
             <p className='text-sm text-[#333]'>今天</p>
           </div>
         </div>
-        <div className='flex flex-wrap gap-1 basis-40 grow content-start'>
+        <div className='px-20 flex flex-wrap gap-1 basis-40 grow content-start'>
           {rectangles}
         </div>
       </main>
