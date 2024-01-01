@@ -94,14 +94,15 @@ export default function useMilestones() {
           startDate = birthday
         } else {
           startDate = index < defaultMilestoneDurationYears.length ?
-            new Date(birthday.getFullYear() + pastYears + extraSchoolGapYear, 8, 1) : undefined
+            new Date(birthday.getFullYear() + pastYears + extraSchoolGapYear, 8, 1) :
+            new Date(birthday.getFullYear() + defaultMilestoneDurationYears.reduce((previousValue, currentValue) => previousValue + currentValue, 0), 6, 1)
         }
         const object = {
           ...it,
           startDate,
           endDate: index < defaultMilestoneDurationYears.length ?
             new Date(birthday.getFullYear() + defaultMilestoneDurationYears[index] + pastYears + extraSchoolGapYear, 5, 1) :
-            undefined
+            new Date()
         }
         pastYears += defaultMilestoneDurationYears[index]
         return object
