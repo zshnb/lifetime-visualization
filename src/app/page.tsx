@@ -275,6 +275,7 @@ export default function Home() {
               <DatePicker
                 sx={{
                   "& fieldset": { border: 'none' },
+                  '& input': { fontSize: '20px' }
                 }}
                 format='yyyy-MM-dd'
                 className='basis-1/6 grow-0 bg-white rounded-[20px]'
@@ -292,7 +293,7 @@ export default function Home() {
             }}/>
           </div>
           <div className='flex items-start gap-8 flex-nowrap overflow-x-auto px-20 py-4 relative'>
-            <div className='self-start min-w-[50px]'>
+            <div className='self-start min-w-[50px] mt-[-8px]'>
               <Image src='/lifetime/cake.svg' alt='cake' width={50} height={50}/>
             </div>
             {
@@ -338,7 +339,7 @@ export default function Home() {
             <p className='text-sm text-[#333]'>今天</p>
           </div>
         </div>
-        <div className='px-20 flex flex-wrap gap-1 basis-40 grow content-start'>
+        <div className='px-20 flex flex-wrap gap-[20px] basis-40 grow content-start'>
           {rectangles}
         </div>
       </main>

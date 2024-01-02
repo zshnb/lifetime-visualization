@@ -8,7 +8,8 @@ const Tab = styled(BaseTab)`
   font-size: 0.875rem;
   font-weight: 600;
   background-color: transparent;
-  width: fit-content;
+  width: 68px;
+  line-height: 32px;
   padding: 8px 16px;
   margin: 6px;
   border: none;
