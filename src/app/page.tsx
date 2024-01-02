@@ -47,7 +47,7 @@ export default function Home() {
   }, [unit, maxYear])
 
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
-  const {milestones, addMilestone, updateMilestone, removeMilestone, confirmMilestoneDate, getCoveredMilestone} = useMilestones()
+  const {milestones, addMilestone, updateMilestone, confirmMilestoneDate, getCoveredMilestone} = useMilestones()
 
   const theme = useMemo(
     () =>
@@ -270,14 +270,14 @@ export default function Home() {
       </header>
       <main className='py-7 flex flex-col overflow-x-hidden'>
         <div className='pb-4 flex flex-col gap-2'>
-          <div className='flex flex-col md:flex-row justify-center gap-4 w-full'>
+          <div className='flex flex-col md:flex-row justify-center gap-4 w-[90%] md:w-full m-4 md:m-0'>
             <LocalizationProvider dateAdapter={AdapterDateFns}>
               <DatePicker
                 sx={{
                   "& fieldset": { border: 'none' },
                 }}
                 format='yyyy-MM-dd'
-                className='basis-1/5 grow-0 bg-white rounded-[20px]'
+                className='basis-1/6 grow-0 bg-white rounded-[20px]'
                 value={birthday}
                 onChange={handleChangeBirthday}/>
             </LocalizationProvider>
