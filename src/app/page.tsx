@@ -12,28 +12,16 @@ import {
   differenceInMonths,
   differenceInWeeks,
   differenceInYears, format,
-  isBefore, min, startOfWeek, toDate
+  min, startOfWeek, toDate
 } from "date-fns";
 import {
   createTheme, Divider,
-  Stack,
-  TextField,
   ThemeProvider,
   useMediaQuery
 } from "@mui/material";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faGithub} from '@fortawesome/free-brands-svg-icons'
-import {faClose, faTag, faLocationDot, faCalendar, faPlus} from '@fortawesome/free-solid-svg-icons'
 import {useDebouncedCallback} from "use-debounce";
-import {
-  Timeline,
-  TimelineConnector,
-  TimelineContent,
-  TimelineDot,
-  TimelineItem,
-  TimelineOppositeContent,
-  TimelineSeparator
-} from "@mui/lab";
 import CustomMilestoneDialog, {CustomMilestoneDialogRef, Milestone} from "@/components/CustomMilestoneDialog";
 import useMilestones from "@/hooks/useMilestones";
 import {twColorToHex} from "@/utils/colorUtil";
@@ -44,8 +32,8 @@ import TabsList from "@/components/tabs/TabsList";
 import Tab from "@/components/tabs/Tab";
 import MilestoneRectangle from "@/components/Milestone";
 import Image from "next/image";
+import TextFieldInput from "@/components/TextFieldInput";
 
-type TimelineItemType = Pick<Milestone, 'label' | 'color' | 'startDate' | 'site'>
 export default function Home() {
   const [maxYear, setMaxYear] = useState(80)
   const [birthday, setBirthday] = useState<Date | undefined>(undefined)
@@ -290,30 +278,20 @@ export default function Home() {
                 }}
                 format='yyyy-MM-dd'
                 className='basis-1/5 grow-0 bg-white rounded-[20px]'
-                label='生日'
                 value={birthday}
                 onChange={handleChangeBirthday}/>
             </LocalizationProvider>
-            <TextField
-              label="期望寿命"
-              variant="outlined"
-              className='basis-1/7 grow-0 bg-white rounded-[20px]'
-              sx={{
-                "& fieldset": { border: 'none' },
-              }}
-              value={maxYear}
-              type='number'
-              onChange={(e) => {
-                const maxYear = Math.min(parseInt(e.target.value), 120)
-                setMaxYear(maxYear)
-                save({
-                  user: {
-                    maxYear
-                  }
-                })
-              }}/>
+            <TextFieldInput label='人生长度' value={maxYear} onChange={(e) => {
+              const maxYear = Math.min(parseInt(e.target.value), 120)
+              setMaxYear(maxYear)
+              save({
+                user: {
+                  maxYear
+                }
+              })
+            }}/>
           </div>
-          <div className='flex items-center gap-8 flex-nowrap overflow-x-auto px-20 py-4 relative'>
+          <div className='flex items-start gap-8 flex-nowrap overflow-x-auto px-20 py-4 relative'>
             <div className='self-start min-w-[50px]'>
               <Image src='/lifetime/cake.svg' alt='cake' width={50} height={50}/>
             </div>
