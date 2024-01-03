@@ -5,12 +5,12 @@ const Tab = styled(BaseTab)`
   font-family: 'IBM Plex Sans', sans-serif;
   color: #333;
   cursor: pointer;
-  font-size: 0.875rem;
+  font-size: 1rem;
   font-weight: 600;
   background-color: transparent;
-  width: 68px;
-  line-height: 32px;
-  padding: 8px 16px;
+  width: 60px;
+  line-height: 28px;
+  padding: 10px 12px;
   margin: 6px;
   border: none;
   border-radius: 14px;

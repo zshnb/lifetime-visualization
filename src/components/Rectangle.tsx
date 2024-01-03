@@ -55,7 +55,7 @@ export default function Rectangle(props: RectangleProps) {
 
   return (
     <div
-      className={`relative border-0 rounded ${props.backgroundColor} ${props.className}`}
+      className={`relative border-0 rounded-[6px] ${props.backgroundColor} ${props.className}`}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       onClick={props.onClick}

@@ -2,7 +2,7 @@ import { TabsList as BaseTabsList } from '@mui/base/TabsList';
 import {styled} from "@mui/material";
 const TabsList = styled(BaseTabsList)(
   ({ theme }) => `
-  width: fit-content;
+  width: 270px;
   background-color: #E8E3D8;
   border-radius: 20px;
   display: flex;

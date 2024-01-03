@@ -154,7 +154,7 @@ export default function Home() {
       return twColorToHex('bg-white')
     }
 
-    return twColorToHex('bg-green-200')
+    return 'rgba(255,56,205,0.3)'
   }, [birthday, unit, getCoveredMilestone, todayIndex])
 
 
@@ -259,26 +259,27 @@ export default function Home() {
   const fullScreenImageViewRef = useRef<FullScreenImageViewRef>(null)
   return (
     <ThemeProvider theme={theme}>
-      <header className='pt-20 flex flex-col justify-center items-center'>
+      <header className='pt-20 flex flex-col justify-center items-center mb-12 gap-y-[20px]'>
         <p className='text-2xl text-center text-[#CAC6B4]'>rén shēng shí guāng zhóu</p>
-        <div className='flex ml-4'>
-          <p className='text-[50px] text-center font-extralight text-[#726647]'>人生时光轴</p>
-          <a className='no-underline self-end mb-4 ml-2' href='https://github.com/zshnb/lifetime-visualization' target='_blank'>
+        <div className='relative'>
+          <Image src='/lifetime/title.svg' alt='title' width={400} height={75}/>
+          <a className='no-underline absolute top-11 right-[-2.5rem]' href='https://github.com/zshnb/lifetime-visualization'
+             target='_blank'>
             <FontAwesomeIcon icon={faGithub} fontSize={26} color={'#CAC6B4'}/>
           </a>
         </div>
       </header>
       <main className='py-7 flex flex-col overflow-x-hidden'>
-        <div className='pb-4 flex flex-col gap-2'>
-          <div className='flex flex-col md:flex-row justify-center gap-4 w-[90%] md:w-full m-4 md:m-0'>
+        <div className='pb-4 flex flex-col gap-y-[48px]'>
+          <div className='flex flex-col md:flex-row justify-center gap-[40px] w-[90%] md:w-full m-4 md:m-0'>
             <LocalizationProvider dateAdapter={AdapterDateFns}>
               <DatePicker
                 sx={{
-                  "& fieldset": { border: 'none' },
-                  '& input': { fontSize: '20px' }
+                  "& fieldset": {border: 'none'},
+                  '& input': {fontSize: '20px', padding: '16.5px 40px'}
                 }}
                 format='yyyy-MM-dd'
-                className='basis-1/6 grow-0 bg-white rounded-[20px]'
+                className='basis-1/6 grow-0 bg-white rounded-[20px] text-[#333333]'
                 value={birthday}
                 onChange={handleChangeBirthday}/>
             </LocalizationProvider>
@@ -315,11 +316,11 @@ export default function Home() {
               <Image src='/lifetime/plus.svg' alt='cake' width={21} height={22}/>
               <p>添加人生节点</p>
             </div>
-            <Divider className='absolute top-10 left-0 w-full bg-[#726647]'/>
+            <Divider className='absolute top-10 left-0 w-full bg-[#D7D3C8] h-[2px]'/>
           </div>
         </div>
-        <div className='px-20 flex justify-between items-center mb-[30px]'>
-          <Tabs value={unit} defaultValue={unit} onChange={(event, value) => {
+        <div className='px-[204px] flex justify-between items-center mb-[30px]'>
+          <Tabs className='w-[270px]' value={unit} defaultValue={unit} onChange={(event, value) => {
             setUnit(value as number)
             save({
               user: {
@@ -334,12 +335,12 @@ export default function Home() {
               <Tab value={365}>日</Tab>
             </TabsList>
           </Tabs>
-          <div className='flex gap-x-2 items-center'>
+          <div className='flex gap-x-2 items-center pr-8'>
             <Rectangle backgroundColor={['#FFF', '#FF4A4A']}/>
             <p className='text-sm text-[#333]'>今天</p>
           </div>
         </div>
-        <div className='px-20 flex flex-wrap gap-[20px] basis-40 grow content-start'>
+        <div className='px-[205px] flex flex-wrap gap-[10px] basis-40 grow content-start'>
           {rectangles}
         </div>
       </main>
