@@ -26,18 +26,20 @@ export default function RootLayout({
     <>
       <head>
         <link rel='icon' href='favicon.ico'/>
+        <title>人生时光轴</title>
       </head>
       <html lang="en" className='bg-[#F1EFE4] dark:bg-slate-800'>
       <body className={inter.className}>{children}</body>
-      <Script async src="https://www.googletagmanager.com/gtag/js?id=G-M78LJWJ2HM"></Script>
       </html>
+      <Script async src="https://www.googletagmanager.com/gtag/js?id=G-5KPCVF925B"></Script>
+      <Script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5129204676047532" crossOrigin={'anonymous'}></Script>
       <Script>
         {
           `
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
-          gtag('config', 'G-M78LJWJ2HM');
+          gtag('config', 'G-5KPCVF925B');
           `
         }
       </Script>
