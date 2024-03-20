@@ -10,6 +10,7 @@ export interface RectangleProps {
   milestones?: Milestone[]
   onClick?: () => void
   className?: string
+  width?: number
 }
 
 export default function Rectangle(props: RectangleProps) {
@@ -54,11 +55,15 @@ export default function Rectangle(props: RectangleProps) {
 
   return (
     <div
-      className={`relative w-4 h-4 border-0 rounded ${props.backgroundColor} ${props.className}`}
+      className={`relative border-0 rounded-[6px] ${props.backgroundColor} ${props.className}`}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       onClick={props.onClick}
-      style={style}
+      style={{
+        ...style,
+        width: `${props.width || 30}px`,
+        height: `${props.width || 30}px`
+      }}
     >
       {
         (props.milestones?.length || 0) > 0 && (

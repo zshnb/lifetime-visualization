@@ -12,41 +12,28 @@ import {
   differenceInMonths,
   differenceInWeeks,
   differenceInYears, format,
-  isBefore, min, toDate
+  min, startOfWeek, toDate
 } from "date-fns";
 import {
-  createTheme,
-  FormControl,
-  FormControlLabel,
-  FormLabel,
-  Radio,
-  RadioGroup,
-  Stack,
-  TextField,
+  createTheme, Divider,
   ThemeProvider,
   useMediaQuery
 } from "@mui/material";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faGithub} from '@fortawesome/free-brands-svg-icons'
-import {faClose, faTag, faLocationDot, faCalendar} from '@fortawesome/free-solid-svg-icons'
 import {useDebouncedCallback} from "use-debounce";
-import {
-  Timeline,
-  TimelineConnector,
-  TimelineContent,
-  TimelineDot,
-  TimelineItem,
-  TimelineOppositeContent,
-  TimelineSeparator
-} from "@mui/lab";
 import CustomMilestoneDialog, {CustomMilestoneDialogRef, Milestone} from "@/components/CustomMilestoneDialog";
 import useMilestones from "@/hooks/useMilestones";
 import {twColorToHex} from "@/utils/colorUtil";
 import useStorage from "@/hooks/useStorage";
 import FullScreenImageViewMemo, {FullScreenImageViewRef} from "@/components/FullScreenImageView";
-import Script from "next/script";
+import {Tabs} from "@mui/base";
+import TabsList from "@/components/tabs/TabsList";
+import Tab from "@/components/tabs/Tab";
+import MilestoneRectangle from "@/components/Milestone";
+import Image from "next/image";
+import TextFieldInput from "@/components/TextFieldInput";
 
-type TimelineItemType = Pick<Milestone, 'label' | 'color' | 'startDate' | 'site'>
 export default function Home() {
   const [maxYear, setMaxYear] = useState(80)
   const [birthday, setBirthday] = useState<Date | undefined>(undefined)
@@ -60,7 +47,7 @@ export default function Home() {
   }, [unit, maxYear])
 
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
-  const {milestones, addMilestone, updateMilestone, removeMilestone, confirmMilestoneDate, getCoveredMilestone} = useMilestones()
+  const {milestones, addMilestone, updateMilestone, confirmMilestoneDate, getCoveredMilestone} = useMilestones()
 
   const theme = useMemo(
     () =>
@@ -68,6 +55,17 @@ export default function Home() {
         palette: {
           mode: prefersDarkMode ? 'dark' : 'light',
         },
+        components: {
+          MuiTextField: {
+            styleOverrides: {
+              root: {
+                input: {
+                  color: 'black'
+                }
+              }
+            }
+          }
+        }
       }),
     [prefersDarkMode],
   );
@@ -90,42 +88,35 @@ export default function Home() {
     }
   }, 500)
 
-  const liveDays = useMemo(() => {
-    let days = 0
-    if (validDate && birthday) {
-      const date = min([new Date(), addYears(birthday, maxYear)])
+  const todayIndex = useMemo(() => {
+    if (birthday) {
+      const date = new Date()
       switch (unit) {
         case 365: {
-          days = differenceInDays(date, birthday)
-          break
+          return differenceInDays(date, birthday)
         }
         case 52: {
-          days = differenceInWeeks(date, birthday)
-          break
+          const rightDate = new Date(birthday.getFullYear(), birthday.getMonth(), startOfWeek(birthday).getDay())
+          return differenceInWeeks(date, rightDate)
         }
         case 12: {
-          days = differenceInMonths(date, birthday)
-          break
+          const rightDate = new Date(birthday.getFullYear(), birthday.getMonth(), 1)
+          return differenceInMonths(date, rightDate)
         }
         case 1: {
-          days = differenceInYears(date, birthday)
-          break
+          const rightDate = new Date(birthday.getFullYear(), 0, 1)
+          return differenceInYears(date, rightDate)
+        }
+        default: {
+          return 0
         }
       }
+    } else {
+      return 0
     }
-    return days;
-  }, [unit, validDate, birthday, maxYear])
+  }, [unit, birthday])
 
   const getBackgroundColors = useCallback((day: number) => {
-    // 今天
-    if (day === liveDays) {
-      return twColorToHex('bg-sky-600')
-    }
-    // 未来
-    if (day > liveDays) {
-      return twColorToHex('bg-slate-200')
-    }
-
     if (birthday) {
       let date = new Date()
       switch (unit) {
@@ -153,8 +144,18 @@ export default function Home() {
       }
     }
 
-    return twColorToHex('bg-green-200')
-  }, [liveDays, birthday, unit, getCoveredMilestone])
+    // 今天
+    if (day === todayIndex) {
+      return ['#FFF', '#FF4A4A']
+    }
+
+    // 未来
+    if (day > todayIndex) {
+      return twColorToHex('bg-white')
+    }
+
+    return 'rgba(255,56,205,0.3)'
+  }, [birthday, unit, getCoveredMilestone, todayIndex])
 
 
   const rectangles = useMemo(() => {
@@ -187,12 +188,6 @@ export default function Home() {
         key={it}
         date={validDate ? date : undefined}
         unit={unit}
-        onClick={() => {
-          customMilestoneRef.current?.open({
-            startDate: date,
-            endDate: date
-          })
-        }}
         backgroundColor={backgroundColor}
         milestones={validMilestones}
       />
@@ -247,22 +242,6 @@ export default function Home() {
     }
   }, [unit, validDate, birthday, maxYear])
 
-  const timelineItems: TimelineItemType[] = useMemo(() => {
-    if (validDate) {
-      return milestones.filter(it => it.startDate !== undefined && isBefore(it.startDate, new Date()))
-        .map(it => {
-          return {
-            startDate: it.startDate,
-            label: it.label,
-            color: it.color,
-            site: it.site
-          }
-        })
-    } else {
-      return []
-    }
-  }, [validDate, milestones])
-
   useEffect(() => {
     const data = load()
     if (data?.user) {
@@ -276,137 +255,94 @@ export default function Home() {
   }, [])
 
   const customMilestoneRef = useRef<CustomMilestoneDialogRef>(null)
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   const fullScreenImageViewRef = useRef<FullScreenImageViewRef>(null)
   return (
     <ThemeProvider theme={theme}>
-      <header className='px-20 pt-2 flex justify-between items-center'>
-        <p className='text-3xl'>人生进度表</p>
-        <a className='no-underline' href='https://github.com/zshnb/lifetime-visualization' target='_blank'>
-          <FontAwesomeIcon icon={faGithub} fontSize={30}/>
-        </a>
+      <header className='pt-20 flex flex-col justify-center items-center mb-12 gap-y-[20px]'>
+        <p className='text-2xl text-center text-[#CAC6B4]'>rén shēng shí guāng zhóu</p>
+        <div className='relative'>
+          <Image src='/title.svg' alt='title' width={400} height={75}/>
+          <a className='no-underline absolute top-11 right-[-2.5rem]' href='https://github.com/zshnb/lifetime-visualization'
+             target='_blank'>
+            <FontAwesomeIcon icon={faGithub} fontSize={26} color={'#CAC6B4'}/>
+          </a>
+        </div>
       </header>
-      <main className='p-20 flex flex-col overflow-x-hidden'>
-        <div className='pb-4 flex flex-col gap-2'>
-          <div className='flex flex-col items-start gap-y-2 w-1/4'>
+      <main className='py-7 flex flex-col overflow-x-hidden'>
+        <div className='pb-4 flex flex-col gap-y-[48px]'>
+          <div className='flex flex-col md:flex-row justify-center gap-[40px] w-[90%] md:w-full m-4 md:m-0'>
             <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <DatePicker format='yyyy-MM-dd' className='w-full' label='生日' value={birthday}
-                          onChange={handleChangeBirthday}/>
+              <DatePicker
+                sx={{
+                  "& fieldset": {border: 'none'},
+                  '& input': {fontSize: '20px', padding: '16.5px 40px'}
+                }}
+                format='yyyy-MM-dd'
+                className='basis-1/6 grow-0 bg-white rounded-[20px] text-[#333333]'
+                value={birthday}
+                onChange={handleChangeBirthday}/>
             </LocalizationProvider>
-            <TextField
-              label="预计寿命"
-              variant="outlined"
-              className='w-full'
-              value={maxYear}
-              type='number'
-              onChange={(e) => {
-                const maxYear = Math.min(parseInt(e.target.value), 120)
-                setMaxYear(maxYear)
-                save({
-                  user: {
-                    maxYear
-                  }
-                })
-              }}/>
-            <FormControl>
-              <FormLabel>显示粒度</FormLabel>
-              <RadioGroup row value={unit} onChange={(e) => {
-                setUnit(parseInt(e.target.value))
-                save({
-                  user: {
-                    unit: parseInt(e.target.value)
-                  }
-                })
-              }}>
-                <FormControlLabel value={365} control={<Radio/>} label="日"/>
-                <FormControlLabel value={52} control={<Radio/>} label="周"/>
-                <FormControlLabel value={12} control={<Radio/>} label="月"/>
-                <FormControlLabel value={1} control={<Radio/>} label="年"/>
-              </RadioGroup>
-            </FormControl>
+            <TextFieldInput label='人生长度' value={maxYear} onChange={(e) => {
+              const maxYear = Math.min(parseInt(e.target.value), 120)
+              setMaxYear(maxYear)
+              save({
+                user: {
+                  maxYear
+                }
+              })
+            }}/>
           </div>
-          <div className='flex items-center gap-8 flex-wrap'>
+          <div className='flex items-start gap-8 flex-nowrap overflow-x-auto px-20 py-4 relative'>
+            <div className='self-start min-w-[50px] mt-[-8px]'>
+              <Image src='/cake.svg' alt='cake' width={50} height={50}/>
+            </div>
             {
               milestones.map((it, index) => {
-                return (
-                  <div
-                    className='flex gap-1 items-center'
-                    key={it.label}
-                    onMouseEnter={() => setHoveredIndex(index)}
-                    onMouseLeave={() => setHoveredIndex(null)}
-                  >
-                    <Rectangle className='cursor-pointer' backgroundColor={it.color} key={it.label} onClick={() => {
-                      if (it.startDate) {
-                        customMilestoneRef.current?.open(it)
-                      }
-                    }}/>
-                    <p>{it.label}</p>
-                    {
-                      it.startDate && (
-                        <FontAwesomeIcon className={`${hoveredIndex === index ? 'inline' : 'hidden'}`} icon={faClose}
-                                         onClick={() => removeMilestone(index)}/>
-                      )
-                    }
-                  </div>
-                )
+                return <MilestoneRectangle
+                  key={it.label}
+                  customMilestoneRef={customMilestoneRef}
+                  milestone={it}
+                  index={index}
+                />
               })
             }
+            <div
+              className='flex shrink-0 gap-2 justify-center items-center self-start min-w-[116px] bg-[#E8E3D3] rounded-[14px] px-6 py-[10px] shadow-[0_2px_0_0_#D7D3C8] text-[#726647] cursor-pointer z-10'
+              onClick={() => {
+                customMilestoneRef.current?.open({})
+              }}
+            >
+              <Image src='/plus.svg' alt='cake' width={21} height={22}/>
+              <p>添加人生节点</p>
+            </div>
+            <Divider className='absolute top-10 left-0 w-full bg-[#D7D3C8] h-[2px]'/>
           </div>
-          {
-            validDate && birthday && (
-              <div className='flex gap-x-2'>
-                <p>你的生日：{format(birthday, 'yyyy-MM-dd')}</p>
-                <p>预计寿命：{maxYear}岁</p>
-                <p>{aliveDisplay}</p>
-                <p>{remainDisplay}</p>
-                <p className='font-bold'>祝你长命百岁</p>
-              </div>
-            )
-          }
         </div>
-        <Stack direction='row' gap={2}>
-          {
-            timelineItems.length > 0 && (
-              <div className='basis-80'>
-                <Timeline position="right">
-                  {
-                    timelineItems.map((it) => (
-                      <TimelineItem>
-                        <TimelineOppositeContent color="text.secondary">
-                          {it.startDate && format(it.startDate, 'yyyy-MM-dd')}
-                          <FontAwesomeIcon icon={faCalendar} style={{marginLeft: '0.5rem'}}/>
-                        </TimelineOppositeContent>
-                        <TimelineSeparator>
-                          <TimelineDot
-                            sx={{color: twColorToHex(it.color), backgroundColor: twColorToHex(it.color)}}/>
-                          <TimelineConnector/>
-                        </TimelineSeparator>
-                        <TimelineContent>
-                          <div className='flex gap-2 items-center'>
-                            <FontAwesomeIcon icon={faTag} style={{color: '#666666'}}/>
-                            <p>{it.label}</p>
-                          </div>
-                          {
-                            it.site && (
-                              <div className='flex gap-2 items-center'>
-                                <FontAwesomeIcon icon={faLocationDot} style={{color: '#666666'}}/>
-                                <p>{it.site}</p>
-                              </div>
-                            )
-                          }
-                        </TimelineContent>
-                      </TimelineItem>
-                    ))
-                  }
-                </Timeline>
-              </div>
-            )
-          }
-          <div className='flex flex-wrap gap-1 basis-40 grow content-start'>
-            {rectangles}
+        <div className='px-[204px] flex justify-between items-center mb-[30px]'>
+          <Tabs className='w-[270px]' value={unit} defaultValue={unit} onChange={(event, value) => {
+            setUnit(value as number)
+            save({
+              user: {
+                unit: value as number
+              }
+            })
+          }}>
+            <TabsList>
+              <Tab value={1}>年</Tab>
+              <Tab value={12}>月</Tab>
+              <Tab value={52}>周</Tab>
+              <Tab value={365}>日</Tab>
+            </TabsList>
+          </Tabs>
+          <div className='flex gap-x-2 items-center pr-8'>
+            <Rectangle backgroundColor={['#FFF', '#FF4A4A']}/>
+            <p className='text-sm text-[#333]'>今天</p>
           </div>
-        </Stack>
+        </div>
+        <div className='px-[205px] flex flex-wrap gap-[10px] basis-40 grow content-start'>
+          {rectangles}
+        </div>
       </main>
       <CustomMilestoneDialog
         ref={customMilestoneRef}

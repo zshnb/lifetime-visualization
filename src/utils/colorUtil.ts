@@ -24,6 +24,8 @@ export function twColorToHex(twColor: string) {
       return "#0284c7"
     case "bg-purple-400":
       return "#c084fc"
+    case 'bg-white':
+      return '#fff'
     default:
       return twColor
   }

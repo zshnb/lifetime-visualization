@@ -9,58 +9,52 @@ export default function useMilestones() {
   const [milestones, setMilestones] = useState<Milestone[]>([
     {
       label: '童年',
-      color: 'bg-zinc-400',
+      color: '#26AD5F',
       images: [],
       default: true
     },
     {
       label: '幼儿园',
-      color: 'bg-red-600',
+      color: '#5476AA',
       images: [],
       default: true
     },
     {
       label: '小学',
-      color: 'bg-orange-400',
+      color: '#EB5757',
       images: [],
       default: true
     },
     {
       label: '初中',
-      color: 'bg-yellow-400',
+      color: '#8079B6',
       images: [],
       default: true
     },
     {
       label: '高中',
-      color: 'bg-rose-400',
+      color: '#C77BAA',
       images: [],
       default: true
     },
     {
       label: '大学本科',
-      color: 'bg-cyan-400',
+      color: '#EFCB6C',
       images: [],
       default: true
     },
     {
       label: '日常',
-      color: 'bg-green-200',
+      color: '#FF38CD4C',
       images: [],
       default: true
-    },
-    {
-      label: '今天',
-      color: 'bg-sky-600',
-      images: [],
-      default: true
-    },
+    }
   ])
 
   const {save, load} = useStorage()
 
   const addMilestone = useCallback((milestone: Milestone) => {
-    milestones.splice(milestones.length - 2, 0, milestone)
+    milestones.splice(milestones.length - 1, 0, milestone)
     setMilestones([...sortMilestones(milestones)])
     save({
       milestones
@@ -100,14 +94,15 @@ export default function useMilestones() {
           startDate = birthday
         } else {
           startDate = index < defaultMilestoneDurationYears.length ?
-            new Date(birthday.getFullYear() + pastYears + extraSchoolGapYear, 8, 1) : undefined
+            new Date(birthday.getFullYear() + pastYears + extraSchoolGapYear, 8, 1) :
+            new Date(birthday.getFullYear() + defaultMilestoneDurationYears.reduce((previousValue, currentValue) => previousValue + currentValue, 0), 6, 1)
         }
         const object = {
           ...it,
           startDate,
           endDate: index < defaultMilestoneDurationYears.length ?
             new Date(birthday.getFullYear() + defaultMilestoneDurationYears[index] + pastYears + extraSchoolGapYear, 5, 1) :
-            undefined
+            new Date()
         }
         pastYears += defaultMilestoneDurationYears[index]
         return object
