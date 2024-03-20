@@ -49,7 +49,7 @@ function MilestoneComponent({customMilestoneRef, milestone, index}: MilestonePro
             {
               site && (
                 <>
-                  <Image src='/lifetime/site.svg' alt='site' width={14} height={19}/>
+                  <Image src='/site.svg' alt='site' width={14} height={19}/>
                   <p className='text-[#726647] text-base font-semibold'>{site}</p>
                 </>
               )

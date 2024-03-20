@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-	basePath: '/lifetime'
+	basePath: ''
 }
 
 module.exports = nextConfig

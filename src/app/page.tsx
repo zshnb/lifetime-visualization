@@ -262,7 +262,7 @@ export default function Home() {
       <header className='pt-20 flex flex-col justify-center items-center mb-12 gap-y-[20px]'>
         <p className='text-2xl text-center text-[#CAC6B4]'>rén shēng shí guāng zhóu</p>
         <div className='relative'>
-          <Image src='/lifetime/title.svg' alt='title' width={400} height={75}/>
+          <Image src='/title.svg' alt='title' width={400} height={75}/>
           <a className='no-underline absolute top-11 right-[-2.5rem]' href='https://github.com/zshnb/lifetime-visualization'
              target='_blank'>
             <FontAwesomeIcon icon={faGithub} fontSize={26} color={'#CAC6B4'}/>
@@ -295,7 +295,7 @@ export default function Home() {
           </div>
           <div className='flex items-start gap-8 flex-nowrap overflow-x-auto px-20 py-4 relative'>
             <div className='self-start min-w-[50px] mt-[-8px]'>
-              <Image src='/lifetime/cake.svg' alt='cake' width={50} height={50}/>
+              <Image src='/cake.svg' alt='cake' width={50} height={50}/>
             </div>
             {
               milestones.map((it, index) => {
@@ -313,7 +313,7 @@ export default function Home() {
                 customMilestoneRef.current?.open({})
               }}
             >
-              <Image src='/lifetime/plus.svg' alt='cake' width={21} height={22}/>
+              <Image src='/plus.svg' alt='cake' width={21} height={22}/>
               <p>添加人生节点</p>
             </div>
             <Divider className='absolute top-10 left-0 w-full bg-[#D7D3C8] h-[2px]'/>

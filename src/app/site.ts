@@ -1,7 +1,7 @@
 const baseSiteConfig = {
-  name: "人生进度表",
+  name: "人生时光轴",
   description:
-    "人生进度表",
+    "人生时光轴，回顾逝去的时光，展望未来",
   url: "<https://lifetime.zshnb.com>",
   keywords: [
     "Next.js",
@@ -10,7 +10,9 @@ const baseSiteConfig = {
     "Server Components",
     "Client Components",
     "Material UI",
-    "人生进度表"
+    "人生",
+    "时光",
+    "未来"
   ],
   authors: [
     {
