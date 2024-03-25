@@ -12,7 +12,7 @@ import {
   differenceInMonths,
   differenceInWeeks,
   differenceInYears, format,
-  min, startOfWeek, toDate
+  startOfWeek, toDate
 } from "date-fns";
 import {
   createTheme, Divider,
@@ -47,7 +47,7 @@ export default function Home() {
   }, [unit, maxYear])
 
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
-  const {milestones, addMilestone, updateMilestone, confirmMilestoneDate, getCoveredMilestone} = useMilestones()
+  const {milestones, addMilestone, updateMilestone, confirmMilestoneDate, getCoveredMilestone, removeMilestone} = useMilestones()
 
   const theme = useMemo(
     () =>
@@ -194,54 +194,6 @@ export default function Home() {
     })
   }, [getBackgroundColors, array, unit, validDate, birthday, getCoveredMilestone])
 
-  const aliveDisplay = useMemo(() => {
-    if (validDate && birthday) {
-      const date = min([new Date(), addYears(birthday, maxYear)])
-      switch (unit) {
-        case 365: {
-          const diff = differenceInDays(date, birthday)
-          return <p>已存活{diff}天</p>
-        }
-        case 52: {
-          const diff = differenceInWeeks(date, birthday)
-          return <p>已存活{diff}周</p>
-        }
-        case 12: {
-          const diff = differenceInMonths(date, birthday)
-          return <p>已存活{diff}月</p>
-        }
-        case 1: {
-          const diff = differenceInYears(date, birthday)
-          return <p>已存活{diff}年</p>
-        }
-      }
-    }
-  }, [unit, validDate, birthday, maxYear])
-
-  const remainDisplay = useMemo(() => {
-    if (validDate && birthday) {
-      const date = min([new Date(), addYears(birthday, maxYear)])
-      switch (unit) {
-        case 365: {
-          const diff = differenceInDays(date, birthday)
-          return <p>剩余{Math.max(maxYear * unit - diff, 0)}天</p>
-        }
-        case 52: {
-          const diff = differenceInWeeks(date, birthday)
-          return <p>剩余{Math.max(maxYear * unit - diff, 0)}周</p>
-        }
-        case 12: {
-          const diff = differenceInMonths(date, birthday)
-          return <p>剩余{Math.max(maxYear * unit - diff, 0)}月</p>
-        }
-        case 1: {
-          const diff = differenceInYears(date, birthday)
-          return <p>剩余{Math.max(maxYear * unit - diff, 0)}年</p>
-        }
-      }
-    }
-  }, [unit, validDate, birthday, maxYear])
-
   useEffect(() => {
     const data = load()
     if (data?.user) {
@@ -284,7 +236,7 @@ export default function Home() {
                 onChange={handleChangeBirthday}/>
             </LocalizationProvider>
             <TextFieldInput label='人生长度' value={maxYear} onChange={(e) => {
-              const maxYear = Math.min(parseInt(e.target.value), 120)
+              const maxYear = Math.min(parseInt(e.target.value === '' ? '80' : e.target.value), 120)
               setMaxYear(maxYear)
               save({
                 user: {
@@ -304,6 +256,7 @@ export default function Home() {
                   customMilestoneRef={customMilestoneRef}
                   milestone={it}
                   index={index}
+                  removeMilestone={removeMilestone}
                 />
               })
             }
@@ -316,7 +269,7 @@ export default function Home() {
               <Image src='/plus.svg' alt='cake' width={21} height={22}/>
               <p>添加人生节点</p>
             </div>
-            <Divider className='absolute top-10 left-0 w-full bg-[#D7D3C8] h-[2px]'/>
+            <Divider className={`absolute top-10 left-0 w-full bg-[#D7D3C8] h-[2px]`} style={{width: `${100 + milestones.length * 3}%`}}/>
           </div>
         </div>
         <div className='px-[204px] flex justify-between items-center mb-[30px]'>

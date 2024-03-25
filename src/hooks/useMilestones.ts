@@ -3,6 +3,7 @@ import {Milestone} from "@/components/CustomMilestoneDialog";
 import {endOfMonth, endOfWeek, parseISO, startOfWeek} from "date-fns";
 import useStorage from "@/hooks/useStorage";
 import {sortMilestones} from "@/utils/milestoneUtil";
+import milestone from "@/components/Milestone";
 
 const defaultMilestoneDurationYears = [3, 3, 6, 3, 3, 4]
 export default function useMilestones() {
@@ -55,6 +56,15 @@ export default function useMilestones() {
 
   const addMilestone = useCallback((milestone: Milestone) => {
     milestones.splice(milestones.length - 1, 0, milestone)
+    const normalMilestoneIndex = milestones.findIndex(it => it.label === '日常')
+    const normalMilestone = milestones[normalMilestoneIndex]
+    milestones.splice(normalMilestoneIndex, 1)
+    milestones.push({
+      ...normalMilestone,
+      startDate: undefined,
+      endDate: undefined
+    })
+
     setMilestones([...sortMilestones(milestones)])
     save({
       milestones
@@ -70,13 +80,16 @@ export default function useMilestones() {
     })
   }
 
-  const removeMilestone = useCallback((index: number) => {
-    milestones.splice(index, 1)
-    setMilestones([...milestones])
-    save({
-      milestones
+  const removeMilestone = (index: number) => {
+    setMilestones((prevState) => {
+      const newMilestones = [...prevState];
+      newMilestones.splice(index, 1);
+      save({
+        milestones: newMilestones
+      })
+      return newMilestones;
     })
-  }, [milestones])
+  }
 
   /*
   * when change birthday, calculate milestone's start/end date

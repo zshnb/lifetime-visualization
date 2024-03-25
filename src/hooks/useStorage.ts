@@ -14,6 +14,9 @@ export default function useStorage() {
   const save = (schema: StorageSchema) => {
     const existData = load()
     if (existData) {
+      if (schema.milestones) {
+        existData.milestones = []
+      }
       const merged = merge(existData, schema)
       window.localStorage.setItem(key, JSON.stringify(merged))
     } else {

@@ -11,10 +11,10 @@ export type MilestoneProps = {
   customMilestoneRef: RefObject<CustomMilestoneDialogRef | null>
   milestone: Milestone
   index: number
+  removeMilestone: (index: number) => void
 }
 
-function MilestoneComponent({customMilestoneRef, milestone, index}: MilestoneProps) {
-  const {removeMilestone} = useMilestones()
+function MilestoneComponent({customMilestoneRef, milestone, index, removeMilestone}: MilestoneProps) {
   const {label, color, startDate, site, endDate} = milestone
   const [hover, setHover] = useState(false)
   return (
